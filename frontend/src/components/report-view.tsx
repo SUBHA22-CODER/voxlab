@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { ArrowRight, Warning } from "@phosphor-icons/react";
 import { Button, Card, CardBody, CardHeader } from "@/components/ui";
 import { Reports, Runs } from "@/lib/api";
@@ -96,6 +105,25 @@ export function ScoreRing({ score, size = 150 }: { score: number; size?: number 
         <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
         {grade}
       </span>
+    </div>
+  );
+}
+
+function RadarTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: { key: string; value: number } }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const { key, value } = payload[0].payload;
+  return (
+    <div className="rounded-lg border border-zinc-700/80 bg-zinc-900 px-3 py-2 shadow-[0_8px_24px_rgb(0_0_0/0.4)]">
+      <p className="text-[11px] font-medium text-zinc-300">{COMPONENT_NAMES[key] ?? key}</p>
+      <p className="mt-0.5 font-mono text-sm tabular-nums" style={{ color: COMPONENT_COLORS[key] }}>
+        {value.toFixed(1)}
+      </p>
     </div>
   );
 }
@@ -249,7 +277,35 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
             <span className="text-[11px] text-zinc-600">0 to 100, weighted per run</span>
           </CardHeader>
           <CardBody className="py-6">
-            <ComponentBars summary={summary} />
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center">
+              <div className="mx-auto h-[230px] w-full max-w-[300px]" aria-hidden>
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart
+                    data={Object.entries(summary.components).map(([key, value]) => ({ key, value }))}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius="72%"
+                  >
+                    <PolarGrid stroke="#202024" />
+                    <PolarAngleAxis
+                      dataKey="key"
+                      tick={{ fill: "#a1a1aa", fontSize: 11, fontWeight: 600 }}
+                    />
+                    <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+                    <Radar
+                      dataKey="value"
+                      stroke="#34d399"
+                      strokeWidth={2}
+                      fill="#34d399"
+                      fillOpacity={0.16}
+                      style={{ filter: "drop-shadow(0 0 6px rgb(52 211 153 / 0.25))" }}
+                    />
+                    <Tooltip content={<RadarTooltip />} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+              <ComponentBars summary={summary} />
+            </div>
             <p className="mt-6 border-t border-zinc-800/60 pt-3.5 text-[11px] leading-relaxed text-zinc-600">
               Each component is averaged across sessions (context-heavy scenarios drive R, failure
               scenarios drive E). Weights are configurable per run and shown above.

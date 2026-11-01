@@ -136,8 +136,18 @@ body::after {
   animation: live-pulse 1.6s ease-in-out infinite;
 }
 
+/* Brand waveform equalizer on the auth screens. */
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+.eq-bar {
+  transform-origin: center;
+  animation: eq 1.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .skeleton, .live-dot { animation: none; }
+  .skeleton, .live-dot, .eq-bar { animation: none; }
   .rise { animation: none; }
   .spotlight::before { transition: none; }
 }
