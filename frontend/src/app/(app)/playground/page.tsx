@@ -235,7 +235,7 @@ export default function PlaygroundPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="flex h-[560px] flex-col lg:col-span-2">
+        <Card spotlight className="flex h-[560px] flex-col lg:col-span-2">
           <CardHeader>Conversation</CardHeader>
           <div ref={transcriptRef} className="flex-1 space-y-3 overflow-y-auto p-5">
             {turns.length === 0 && (

@@ -71,7 +71,7 @@ export default function ScenariosPage() {
               </h2>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 {items.map((scenario) => (
-                  <Card key={scenario.id} className="transition-colors duration-200 hover:border-zinc-700">
+                  <Card spotlight key={scenario.id}>
                     <CardBody>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">

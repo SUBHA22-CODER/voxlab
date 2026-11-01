@@ -1,13 +1,13 @@
 "use client";
 
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 type ButtonSize = "sm" | "md";
 
 const buttonStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:bg-emerald-500/40 disabled:text-zinc-950/50 shadow-[0_1px_0_0_rgb(255_255_255/0.15)_inset]",
+    "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:bg-emerald-500/40 disabled:text-zinc-950/50 shadow-[0_1px_0_0_rgb(255_255_255/0.2)_inset,0_4px_12px_rgb(16_185_129/0.25)]",
   secondary:
     "bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700/80 border border-zinc-700/80",
   danger: "bg-red-500/90 text-white hover:bg-red-500",
@@ -27,7 +27,7 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize }) {
   return (
     <button
-      className={`inline-flex select-none items-center justify-center rounded-lg font-medium transition-all duration-150 active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:active:translate-y-0 ${buttonStyles[variant]} ${buttonSizes[size]} ${className}`}
+      className={`inline-flex select-none items-center justify-center rounded-lg font-medium transition-all duration-150 active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:shadow-none ${buttonStyles[variant]} ${buttonSizes[size]} ${className}`}
       {...props}
     />
   );
@@ -56,10 +56,31 @@ export function Label({ children, htmlFor }: { children: ReactNode; htmlFor?: st
   );
 }
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+/** Elevated panel with inner top light. Pass `spotlight` for pointer glow. */
+export function Card({
+  children,
+  className = "",
+  spotlight = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  spotlight?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - rect.left}px`);
+    el.style.setProperty("--my", `${e.clientY - rect.top}px`);
+  }
+
   return (
     <div
-      className={`rounded-xl border border-zinc-800/80 bg-zinc-900/40 shadow-[0_1px_2px_rgb(0_0_0/0.3)] ${className}`}
+      ref={ref}
+      onPointerMove={spotlight ? onPointerMove : undefined}
+      className={`surface rounded-xl border border-zinc-800/70 ${spotlight ? "spotlight" : ""} ${className}`}
     >
       {children}
     </div>
@@ -68,7 +89,7 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
 
 export function CardHeader({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`border-b border-zinc-800/80 px-5 py-3.5 text-sm font-medium text-zinc-200 ${className}`}>
+    <div className={`border-b border-zinc-800/60 px-5 py-3.5 text-sm font-medium text-zinc-200 ${className}`}>
       {children}
     </div>
   );
@@ -81,11 +102,11 @@ export function CardBody({ children, className = "" }: { children: ReactNode; cl
 type BadgeTone = "green" | "red" | "amber" | "zinc" | "blue";
 
 const badgeTones: Record<BadgeTone, string> = {
-  green: "text-emerald-400 border-emerald-500/25 bg-emerald-500/10",
-  red: "text-red-400 border-red-500/25 bg-red-500/10",
-  amber: "text-amber-400 border-amber-500/25 bg-amber-500/10",
-  zinc: "text-zinc-400 border-zinc-600/40 bg-zinc-500/10",
-  blue: "text-sky-400 border-sky-500/25 bg-sky-500/10",
+  green: "text-emerald-300 border-emerald-500/25 bg-emerald-500/[0.08]",
+  red: "text-red-300 border-red-500/25 bg-red-500/[0.08]",
+  amber: "text-amber-300 border-amber-500/25 bg-amber-500/[0.08]",
+  zinc: "text-zinc-400 border-zinc-600/40 bg-zinc-500/[0.08]",
+  blue: "text-sky-300 border-sky-500/25 bg-sky-500/[0.08]",
 };
 
 export function Badge({
@@ -148,7 +169,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
       {icon && (
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-500">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-500 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.05)]">
           {icon}
         </div>
       )}
@@ -171,17 +192,17 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+    <div className="rise mb-7 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-zinc-50">{title}</h1>
-        {subtitle && <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400">{subtitle}</p>}
+        <h1 className="text-[24px] font-semibold leading-tight tracking-[-0.02em] text-zinc-50">{title}</h1>
+        {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-zinc-400">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
 }
 
-/** Section heading without the eyebrow-cliché; weight + size carry hierarchy. */
+/** Section heading; weight + size carry hierarchy. */
 export function SectionTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div className="mb-3 flex items-center justify-between">

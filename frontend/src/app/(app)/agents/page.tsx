@@ -93,7 +93,7 @@ export default function AgentsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {(agents.data ?? []).map((agent) => (
-            <Card key={agent.id} className="transition-colors duration-200 hover:border-zinc-700">
+            <Card spotlight key={agent.id}>
               <CardBody>
                 <div className="mb-2.5 flex items-start justify-between gap-3">
                   <div className="min-w-0">

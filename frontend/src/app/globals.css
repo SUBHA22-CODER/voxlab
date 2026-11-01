@@ -19,18 +19,27 @@ body {
   @apply bg-zinc-950 text-zinc-100 antialiased;
 }
 
-/* Ambient backdrop: faint grid + one emerald glow, fixed so it never repaints. */
+/* Layered backdrop: grid + two emerald glows + vignette, fixed (never repaints). */
 body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 35% at 18% -8%, rgb(16 185 129 / 0.09), transparent 70%),
+    radial-gradient(ellipse 45% 30% at 88% -12%, rgb(45 212 191 / 0.05), transparent 70%),
+    linear-gradient(to right, rgb(255 255 255 / 0.018) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.018) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+}
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgb(16 185 129 / 0.07), transparent 70%),
-    linear-gradient(to right, rgb(255 255 255 / 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.015) 1px, transparent 1px);
-  background-size: 100% 100%, 56px 56px, 56px 56px;
+  background: radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgb(0 0 0 / 0.35) 100%);
 }
 
 ::selection {
@@ -55,6 +64,44 @@ body::before {
   border-radius: 6px;
 }
 
+/* Layered surface: 1px inner light on top edge + ambient depth shadow. */
+.surface {
+  background: linear-gradient(to bottom, rgb(24 24 27 / 0.72), rgb(12 12 14 / 0.72));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 8px 24px rgb(0 0 0 / 0.22);
+}
+.surface-raised {
+  background: linear-gradient(to bottom, rgb(28 28 32 / 0.85), rgb(17 17 20 / 0.85));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+    0 2px 6px rgb(0 0 0 / 0.4),
+    0 16px 40px rgb(0 0 0 / 0.3);
+}
+
+/* Cursor-tracked spotlight (Linear-style) — glow follows the pointer. */
+.spotlight {
+  position: relative;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, 0%),
+    rgb(52 211 153 / 0.08),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
 /* Skeleton shimmer — layout-shaped loaders instead of spinners. */
 @keyframes shimmer {
   0% { background-position: -400px 0; }
@@ -66,9 +113,19 @@ body::before {
   background-size: 800px 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
-@media (prefers-reduced-motion: reduce) {
-  .skeleton { animation: none; }
+
+/* Entrance: content rises into place, staggered by delay utility. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+.rise {
+  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rise-1 { animation-delay: 0.04s; }
+.rise-2 { animation-delay: 0.09s; }
+.rise-3 { animation-delay: 0.14s; }
+.rise-4 { animation-delay: 0.19s; }
 
 /* Live pulse for genuinely running states (semantic, used sparingly). */
 @keyframes live-pulse {
@@ -78,6 +135,9 @@ body::before {
 .live-dot {
   animation: live-pulse 1.6s ease-in-out infinite;
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .live-dot { animation: none; }
+  .skeleton, .live-dot { animation: none; }
+  .rise { animation: none; }
+  .spotlight::before { transition: none; }
 }

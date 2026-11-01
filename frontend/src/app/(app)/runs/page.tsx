@@ -84,7 +84,7 @@ export default function RunsPage() {
         subtitle="Benchmark an agent against selected scenarios. Every conversation is traced and scored."
       />
 
-      <Card className="mb-8">
+      <Card spotlight className="rise rise-1 mb-8">
         <CardHeader>New benchmark</CardHeader>
         <CardBody>
           <form onSubmit={startRun} className="space-y-5">
@@ -185,7 +185,7 @@ export default function RunsPage() {
         </CardBody>
       </Card>
 
-      <Card>
+      <Card spotlight className="rise rise-2">
         <CardHeader>History</CardHeader>
         <CardBody className="p-0">
           {(runs.data ?? []).length === 0 ? (

@@ -65,7 +65,7 @@ export default function TracePage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <div className="rise grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <Card>
             <CardHeader>Pipeline timeline</CardHeader>
@@ -81,7 +81,7 @@ export default function TracePage() {
           </Card>
         </div>
 
-        <div className="space-y-6 lg:col-span-2">
+        <div className="rise rise-2 space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>Evaluation</CardHeader>
             <CardBody>
