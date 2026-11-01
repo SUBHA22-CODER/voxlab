@@ -1,17 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { ArrowRight, Warning } from "@phosphor-icons/react";
 import { Button, Card, CardBody, CardHeader } from "@/components/ui";
 import { Reports, Runs } from "@/lib/api";
@@ -34,104 +24,130 @@ const COMPONENT_NAMES: Record<string, string> = {
   E: "Error recovery",
 };
 
-export function ScoreRing({ score, size = 132 }: { score: number; size?: number }) {
-  const radius = (size - 16) / 2;
+export function ScoreRing({ score, size = 150 }: { score: number; size?: number }) {
+  const radius = (size - 14) / 2;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.max(0, Math.min(100, score));
   const color = clamped >= 80 ? "#34d399" : clamped >= 60 ? "#fbbf24" : "#f87171";
   const grade = clamped >= 80 ? "Strong" : clamped >= 60 ? "Needs review" : "At risk";
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-3">
       <div className="relative">
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`Score ${score} of 100`}>
-          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#1c1c21" strokeWidth="10" />
+        <div
+          aria-hidden
+          className="absolute inset-2 rounded-full opacity-[0.16] blur-xl"
+          style={{ background: color }}
+        />
+        <svg
+          width={size}
+          height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          role="img"
+          aria-label={`Score ${score} of 100`}
+          className="relative"
+        >
+          <defs>
+            <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={color} stopOpacity={0.75} />
+              <stop offset="100%" stopColor={color} />
+            </linearGradient>
+          </defs>
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={color}
-            strokeWidth="10"
+            stroke="#1a1a1f"
+            strokeWidth="9"
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="url(#ring-grad)"
+            strokeWidth="9"
             strokeLinecap="round"
             strokeDasharray={`${(clamped / 100) * circumference} ${circumference}`}
             transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            style={{ filter: `drop-shadow(0 0 6px ${color}55)` }}
+            style={{ filter: `drop-shadow(0 0 8px ${color}44)` }}
           />
           <text
             x="50%"
-            y="46%"
+            y="45%"
             textAnchor="middle"
             dominantBaseline="middle"
             fill="#fafafa"
-            fontSize={size / 3.6}
+            fontSize={size / 3.8}
             fontWeight="650"
             letterSpacing="-0.03em"
           >
             {clamped.toFixed(1)}
           </text>
-          <text x="50%" y="66%" textAnchor="middle" dominantBaseline="middle" fill="#71717a" fontSize={size / 10.5}>
+          <text x="50%" y="65%" textAnchor="middle" dominantBaseline="middle" fill="#71717a" fontSize={size / 11}>
             / 100
           </text>
         </svg>
       </div>
-      <span className="text-xs font-medium" style={{ color }}>
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+        style={{ color, borderColor: `${color}40`, background: `${color}14` }}
+      >
+        <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
         {grade}
       </span>
     </div>
   );
 }
 
-function ChartTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { key: string; value: number } }> }) {
-  if (!active || !payload?.length) return null;
-  const { key, value } = payload[0].payload;
+/** Lighthouse-style metric rows: chip, label + weight, animated track, value. */
+function ComponentBars({ summary }: { summary: ReportSummary }) {
+  const [mounted, setMounted] = useState(false);
+  // Flip after first paint so the width transition runs on entry.
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 40);
+    return () => clearTimeout(timer);
+  }, []);
   return (
-    <div className="rounded-lg border border-zinc-700/80 bg-zinc-900 px-3 py-2 shadow-[0_8px_24px_rgb(0_0_0/0.4)]">
-      <p className="text-[11px] font-medium text-zinc-300">{COMPONENT_NAMES[key] ?? key}</p>
-      <p className="mt-0.5 font-mono text-sm tabular-nums" style={{ color: COMPONENT_COLORS[key] }}>
-        {value.toFixed(1)}
-      </p>
+    <div className="space-y-4">
+      {Object.entries(summary.components).map(([key, value]) => {
+        const color = COMPONENT_COLORS[key] ?? "#71717a";
+        const weight = summary.weights[key];
+        return (
+          <div key={key} className="flex items-center gap-4">
+            <span
+              aria-hidden
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border font-mono text-[11px] font-semibold"
+              style={{ color, borderColor: `${color}35`, background: `${color}12` }}
+            >
+              {key}
+            </span>
+            <div className="w-40 shrink-0">
+              <p className="text-[13px] font-medium text-zinc-200">{COMPONENT_NAMES[key] ?? key}</p>
+              <p className="font-mono text-[10px] text-zinc-600">
+                weight {weight !== undefined ? weight.toFixed(2) : "0.00"}
+              </p>
+            </div>
+            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full border border-zinc-800/60 bg-zinc-900/80 shadow-[inset_0_1px_2px_rgb(0_0_0/0.5)]">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: mounted ? `${Math.min(100, value)}%` : "0%",
+                  background: `linear-gradient(90deg, ${color}66, ${color})`,
+                  transition: "width 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              />
+            </div>
+            <span
+              className="w-14 shrink-0 text-right font-mono text-[15px] font-semibold tabular-nums"
+              style={{ color }}
+            >
+              {value.toFixed(1)}
+            </span>
+          </div>
+        );
+      })}
     </div>
-  );
-}
-
-export function ComponentChart({ components }: { components: ReportSummary["components"] }) {
-  const data = Object.entries(components).map(([key, value]) => ({ key, value }));
-  return (
-    <div className="h-56 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-          <CartesianGrid stroke="#1c1c21" strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="key"
-            tick={{ fill: "#a1a1aa", fontSize: 12, fontWeight: 600 }}
-            axisLine={{ stroke: "#27272a" }}
-            tickLine={false}
-          />
-          <YAxis domain={[0, 100]} tick={{ fill: "#52525b", fontSize: 11 }} axisLine={false} tickLine={false} />
-          <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgb(255 255 255 / 0.03)" }} />
-          <Bar dataKey="value" radius={[5, 5, 0, 0]} maxBarSize={44}>
-            {data.map((entry) => (
-              <Cell key={entry.key} fill={COMPONENT_COLORS[entry.key] ?? "#71717a"} fillOpacity={0.85} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-export function ComponentLegend({ summary }: { summary: ReportSummary }) {
-  return (
-    <ul className="grid grid-cols-1 gap-x-6 gap-y-1 text-xs text-zinc-500 sm:grid-cols-2">
-      {Object.entries(summary.legend).map(([key, text]) => (
-        <li key={key} className="flex gap-2">
-          <span className="font-mono font-semibold" style={{ color: COMPONENT_COLORS[key] }}>
-            {key}
-          </span>
-          <span className="min-w-0">{text}</span>
-        </li>
-      ))}
-    </ul>
   );
 }
 
@@ -146,7 +162,7 @@ export function FailuresList({ summary }: { summary: ReportSummary }) {
   return (
     <div className="divide-y divide-zinc-800/60">
       {summary.failures.map((failure) => (
-        <div key={failure.session_id} className="px-5 py-4">
+        <div key={failure.session_id} className="border-l-2 border-l-red-500/40 px-5 py-4 pl-4">
           <div className="flex items-center justify-between">
             <p className="flex items-center gap-2 text-sm font-medium text-zinc-200">
               <Warning size={14} className="text-red-400" weight="fill" />
@@ -204,15 +220,15 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
 
   return (
     <div className="rise space-y-6">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <Card className="lg:col-span-2">
           <CardHeader>Overall score</CardHeader>
-          <CardBody className="flex flex-col items-center gap-3 pb-6">
+          <CardBody className="flex flex-col items-center gap-4 pb-6">
             <ScoreRing score={summary.score} />
-            <div className="w-full border-t border-zinc-800/60 pt-3 text-center">
-              <p className="font-mono text-[11px] leading-relaxed text-zinc-600">{summary.formula}</p>
+            <div className="w-full border-t border-zinc-800/60 pt-3.5 text-center">
+              <p className="font-mono text-[11px] leading-relaxed text-zinc-500">{summary.formula}</p>
               <p className="mt-2 text-xs text-zinc-400">
-                <span className="font-mono tabular-nums text-zinc-200">
+                <span className="font-mono tabular-nums text-zinc-100">
                   {summary.totals.passed}/{summary.totals.sessions}
                 </span>{" "}
                 scenarios passed
@@ -227,13 +243,17 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
           </CardBody>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>Component breakdown</CardHeader>
-          <CardBody className="pb-2">
-            <ComponentChart components={summary.components} />
-            <div className="mt-2 border-t border-zinc-800/60 pt-3">
-              <ComponentLegend summary={summary} />
-            </div>
+        <Card className="rise rise-1 lg:col-span-3">
+          <CardHeader className="flex items-center justify-between">
+            <span>Component breakdown</span>
+            <span className="text-[11px] text-zinc-600">0 to 100, weighted per run</span>
+          </CardHeader>
+          <CardBody className="py-6">
+            <ComponentBars summary={summary} />
+            <p className="mt-6 border-t border-zinc-800/60 pt-3.5 text-[11px] leading-relaxed text-zinc-600">
+              Each component is averaged across sessions (context-heavy scenarios drive R, failure
+              scenarios drive E). Weights are configurable per run and shown above.
+            </p>
           </CardBody>
         </Card>
       </div>
@@ -255,12 +275,7 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
                 </option>
               ))}
             </select>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={runCompare}
-              disabled={!compareId || comparing}
-            >
+            <Button variant="secondary" size="sm" onClick={runCompare} disabled={!compareId || comparing}>
               {comparing ? "Comparing…" : "Compare"}
             </Button>
           </span>
@@ -274,9 +289,9 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
       <Card>
         <CardHeader>Per-scenario results</CardHeader>
         <CardBody className="p-0">
-          <table className="w-full text-sm">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-zinc-800/80 text-left text-[11px] uppercase tracking-wider text-zinc-500">
+              <tr className="border-b border-zinc-800/60 text-left text-[11px] uppercase tracking-wider text-zinc-500">
                 <th className="px-5 py-2.5 font-medium">Scenario</th>
                 <th className="hidden px-5 py-2.5 font-medium md:table-cell">Category</th>
                 <th className="px-5 py-2.5 font-medium">Result</th>
@@ -288,7 +303,7 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
               {summary.per_session.map((session) => (
                 <tr
                   key={session.session_id}
-                  className="border-b border-zinc-800/40 transition-colors last:border-0 hover:bg-zinc-900/40"
+                  className="border-b border-zinc-800/40 transition-colors last:border-0 hover:bg-zinc-800/20"
                 >
                   <td className="px-5 py-3 text-zinc-200">{session.scenario_name}</td>
                   <td className="hidden px-5 py-3 capitalize text-zinc-500 md:table-cell">
@@ -296,7 +311,9 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
                   </td>
                   <td className="px-5 py-3">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-xs font-medium ${session.passed ? "text-emerald-400" : "text-red-400"}`}
+                      className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                        session.passed ? "text-emerald-400" : "text-red-400"
+                      }`}
                     >
                       <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
                       {session.passed ? "passed" : "failed"}
@@ -304,14 +321,22 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
                   </td>
                   <td className="px-5 py-3 text-right">
                     {session.overall !== null && session.overall !== undefined ? (
-                      <span className="inline-flex min-w-14 items-center justify-end gap-2">
-                        <span className="hidden h-1 w-12 overflow-hidden rounded-full bg-zinc-800 lg:block">
+                      <span className="inline-flex min-w-16 items-center justify-end gap-2.5">
+                        <span className="hidden h-1.5 w-14 overflow-hidden rounded-full bg-zinc-900 shadow-[inset_0_1px_2px_rgb(0_0_0/0.5)] lg:block">
                           <span
-                            className={`block h-full rounded-full ${session.overall >= 80 ? "bg-emerald-500" : session.overall >= 60 ? "bg-amber-500" : "bg-red-500"}`}
-                            style={{ width: `${Math.min(100, session.overall)}%` }}
+                            className="block h-full rounded-full"
+                            style={{
+                              width: `${Math.min(100, session.overall)}%`,
+                              background:
+                                session.overall >= 80
+                                  ? "linear-gradient(90deg,#34d39966,#34d399)"
+                                  : session.overall >= 60
+                                    ? "linear-gradient(90deg,#fbbf2466,#fbbf24)"
+                                    : "linear-gradient(90deg,#f8717166,#f87171)",
+                            }}
                           />
                         </span>
-                        <span className="font-mono text-[13px] tabular-nums text-zinc-200">
+                        <span className="w-12 font-mono text-[13px] tabular-nums text-zinc-100">
                           {session.overall.toFixed(1)}
                         </span>
                       </span>
@@ -368,15 +393,10 @@ function ComparisonStrip({ comparison }: { comparison: Awaited<ReturnType<typeof
   ];
   return (
     <div className="border-b border-zinc-800/60 bg-zinc-950/60 px-5 py-4">
-      <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-        Before / after
-      </p>
+      <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Before / after</p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {rows.map(([label, before, after, delta]) => (
-          <div
-            key={label}
-            className="rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2.5 text-center"
-          >
+          <div key={label} className="rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2.5 text-center">
             <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
             <p className="mt-1 font-mono text-[13px] tabular-nums text-zinc-200">
               {before ?? "-"}

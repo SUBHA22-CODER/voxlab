@@ -10,6 +10,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  ReferenceLine,
 } from "recharts";
 import { ArrowRight, ChartBar, Robot as RobotIcon, TrendUp } from "@phosphor-icons/react";
 import { Agents, Runs, Reports } from "@/lib/api";
@@ -140,6 +141,14 @@ export default function DashboardPage() {
                           tickFormatter={(v) => `#${v}`}
                         />
                         <YAxis domain={[0, 100]} hide />
+                        {stats.avg !== null && (
+                          <ReferenceLine
+                            y={stats.avg}
+                            stroke="#52525b"
+                            strokeDasharray="4 4"
+                            label={{ value: "avg", fill: "#52525b", fontSize: 9, position: "insideTopRight" }}
+                          />
+                        )}
                         <Tooltip
                           cursor={{ stroke: "#3f3f46", strokeDasharray: "3 3" }}
                           content={({ active, payload }) =>
