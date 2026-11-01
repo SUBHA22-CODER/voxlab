@@ -46,7 +46,7 @@ export default function NewAgentPage() {
     <>
       <PageHeader
         title="Register an agent"
-        subtitle="Point VoxLab at your agent's conversation endpoint. No rebuild required — the adapter handles the rest."
+        subtitle="Point VoxLab at your agent's conversation endpoint. No rebuild required: the adapter handles the rest."
       />
       <div className="max-w-2xl">
         <Card>

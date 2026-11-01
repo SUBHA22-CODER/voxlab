@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ArrowLeft } from "@phosphor-icons/react";
 import { Sessions } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
-import { Badge, Button, Card, CardBody, CardHeader, PageHeader, Spinner } from "@/components/ui";
+import { Button, Card, CardBody, CardHeader, PageHeader, Skeleton } from "@/components/ui";
 import { EventTimeline, StageTimeline } from "@/components/trace-timeline";
 import type { Scores } from "@/lib/types";
 
-const SCORE_LABELS: Record<keyof Scores, string> = {
+const SCORE_LABELS: Partial<Record<keyof Scores, string>> = {
   task_completion: "Task completion",
   response_quality: "Response quality",
   context_retention: "Context retention",
@@ -21,21 +22,46 @@ export default function TracePage() {
   const sessionId = Number(params.id);
   const session = useApi(() => Sessions.get(sessionId));
 
-  if (session.loading) return <Spinner label="Loading session…" />;
+  if (session.loading) {
+    return (
+      <>
+        <Skeleton className="h-9 w-64" />
+        <div className="mt-6 grid gap-6 lg:grid-cols-5">
+          <div className="space-y-6 lg:col-span-3">
+            <Skeleton className="h-56 rounded-xl" />
+            <Skeleton className="h-72 rounded-xl" />
+          </div>
+          <Skeleton className="h-96 rounded-xl lg:col-span-2" />
+        </div>
+      </>
+    );
+  }
   if (session.error || !session.data) return <p className="text-sm text-red-400">{session.error}</p>;
   const data = session.data;
 
   return (
     <>
       <PageHeader
-        title={`Trace · session #${data.id}`}
-        subtitle={`Trace ${data.trace_id.slice(0, 12)}… · ${data.source === "playground" ? "playground session" : "benchmark session"}`}
-        actions={
-          data.test_run_id ? (
-            <Link href={`/runs/${data.test_run_id}`}>
-              <Button variant="secondary">Back to run</Button>
-            </Link>
-          ) : undefined
+        title={
+          <span className="flex items-center gap-3">
+            {data.test_run_id && (
+              <Link
+                href={`/runs/${data.test_run_id}`}
+                aria-label="Back to run"
+                className="rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-200"
+              >
+                <ArrowLeft size={18} />
+              </Link>
+            )}
+            Session #{data.id}
+          </span>
+        }
+        subtitle={
+          <>
+            Trace <span className="font-mono text-zinc-500">{data.trace_id.slice(0, 12)}</span>
+            {" · "}
+            {data.source === "playground" ? "playground session" : "benchmark session"}
+          </>
         }
       />
 
@@ -61,47 +87,54 @@ export default function TracePage() {
             <CardBody>
               {data.evaluation ? (
                 <>
-                  <ul className="mb-4 space-y-2">
+                  <ul className="mb-5 space-y-2.5">
                     {(Object.entries(data.evaluation.scores) as Array<[keyof Scores, number]>)
                       .filter(([key]) => key in SCORE_LABELS)
                       .map(([key, value]) => (
-                        <li key={key} className="flex items-center gap-3 text-sm">
-                          <span className="w-36 text-zinc-400">{SCORE_LABELS[key]}</span>
-                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-800">
+                        <li key={key} className="flex items-center gap-3 text-[13px]">
+                          <span className="w-32 shrink-0 text-zinc-400">{SCORE_LABELS[key]}</span>
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-800/80">
                             <div
-                              className={`h-full rounded-full ${value >= 80 ? "bg-emerald-500" : value >= 50 ? "bg-amber-500" : "bg-red-500"}`}
-                              style={{ width: `${value}%` }}
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                value >= 80 ? "bg-emerald-500" : value >= 50 ? "bg-amber-500" : "bg-red-500"
+                              }`}
+                              style={{ width: `${Math.min(100, value)}%` }}
                             />
                           </div>
-                          <span className="w-10 text-right font-mono text-xs text-zinc-300">{value.toFixed(0)}</span>
+                          <span className="w-9 text-right font-mono text-xs tabular-nums text-zinc-300">
+                            {value.toFixed(0)}
+                          </span>
                         </li>
                       ))}
                   </ul>
                   {data.evaluation.feedback.judge && (
-                    <p className="mb-3 text-xs italic text-zinc-500">
-                      judge ({data.evaluation.feedback.judge.mode}): {data.evaluation.feedback.judge.notes || "—"}
+                    <p className="mb-4 text-xs italic leading-relaxed text-zinc-600">
+                      judge ({data.evaluation.feedback.judge.mode}):{" "}
+                      {data.evaluation.feedback.judge.notes || "no notes"}
                     </p>
                   )}
                   <div className="space-y-1.5">
                     {data.evaluation.feedback.checks.map((check, i) => (
                       <div
                         key={i}
-                        className={`rounded-lg border px-3 py-2 text-xs ${
+                        className={`rounded-lg border px-3 py-2 text-xs leading-relaxed ${
                           check.passed
-                            ? "border-emerald-500/20 bg-emerald-500/5 text-zinc-300"
-                            : "border-red-500/20 bg-red-500/5 text-zinc-300"
+                            ? "border-emerald-500/15 bg-emerald-500/[0.04] text-zinc-400"
+                            : "border-red-500/15 bg-red-500/[0.04] text-zinc-400"
                         }`}
                       >
-                        <span className={`font-mono ${check.passed ? "text-emerald-400" : "text-red-400"}`}>
-                          {check.passed ? "✓" : "✗"} {check.type}
+                        <span className={`mr-2 font-mono ${check.passed ? "text-emerald-400" : "text-red-400"}`}>
+                          {check.passed ? "pass" : "fail"} · {check.type}
                         </span>
-                        <span className="ml-2 text-zinc-500">{check.detail}</span>
+                        <span className="text-zinc-500">{check.detail}</span>
                       </div>
                     ))}
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-zinc-500">This session was not evaluated (playground conversation).</p>
+                <p className="text-sm leading-relaxed text-zinc-500">
+                  This session was not evaluated. Playground conversations are traced but not scored.
+                </p>
               )}
             </CardBody>
           </Card>
@@ -109,8 +142,4 @@ export default function TracePage() {
       </div>
     </>
   );
-}
-
-export function SessionStatusBadge({ status }: { status: string }) {
-  return <Badge tone={status === "completed" ? "green" : "red"}>{status}</Badge>;
 }

@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { CaretDown, CaretUp, Lightning } from "@phosphor-icons/react";
 import { Scenarios } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
-import { Badge, Button, Card, CardBody, EmptyState, PageHeader, Spinner } from "@/components/ui";
+import { Badge, Card, CardBody, EmptyState, PageHeader, Skeleton } from "@/components/ui";
 import type { Scenario } from "@/lib/types";
 
 const CATEGORY_TONES: Record<string, "green" | "red" | "amber" | "zinc" | "blue"> = {
@@ -32,65 +33,92 @@ export default function ScenariosPage() {
     return [...byCategory.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [scenarios.data]);
 
-  if (scenarios.loading) return <Spinner label="Loading scenarios…" />;
+  if (scenarios.loading) {
+    return (
+      <>
+        <PageHeader title="Scenario library" />
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-36 rounded-xl" />
+          ))}
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <PageHeader
         title="Scenario library"
-        subtitle="Stress tests your agent must survive — interruptions, API failures, language switches, memory probes."
+        subtitle="Stress tests your agent must survive: interruptions, API failures, language switches, memory probes."
       />
 
       {grouped.length === 0 ? (
         <Card>
-          <EmptyState title="No scenarios loaded" hint="Builtin scenarios load from the repo's scenarios/ directory on startup." />
+          <EmptyState
+            icon={<Lightning size={20} weight="duotone" />}
+            title="No scenarios loaded"
+            hint="Built-in scenarios load from the repo's scenarios/ directory on startup."
+          />
         </Card>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-7">
           {grouped.map(([category, items]) => (
             <div key={category}>
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-                {category.replace(/_/g, " ")} · {items.length}
+              <h2 className="mb-2.5 text-[13px] font-medium text-zinc-300">
+                {category.replace(/_/g, " ")}
+                <span className="ml-2 font-mono text-xs text-zinc-600">{items.length}</span>
               </h2>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 {items.map((scenario) => (
-                  <Card key={scenario.id}>
+                  <Card key={scenario.id} className="transition-colors duration-200 hover:border-zinc-700">
                     <CardBody>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <h3 className="text-sm font-semibold text-zinc-100">{scenario.name}</h3>
-                          <p className="mt-0.5 text-xs text-zinc-400">
+                          <p className="mt-1 text-xs leading-relaxed text-zinc-400">
                             {scenario.definition.description ?? scenario.definition.expected_behavior}
                           </p>
                         </div>
                         <div className="flex shrink-0 gap-1.5">
-                          <Badge tone={CATEGORY_TONES[scenario.category] ?? "zinc"}>{scenario.category.replace(/_/g, " ")}</Badge>
+                          <Badge tone={CATEGORY_TONES[scenario.category] ?? "zinc"}>
+                            {scenario.category.replace(/_/g, " ")}
+                          </Badge>
                           {scenario.is_builtin && <Badge>builtin</Badge>}
                         </div>
                       </div>
-                      <div className="mt-3 flex items-center gap-3 text-xs text-zinc-500">
+                      <div className="mt-3.5 flex items-center gap-4 text-[11px] tabular-nums text-zinc-500">
                         <span>{scenario.definition.steps.length} steps</span>
                         <span>{scenario.definition.checks?.length ?? 0} checks</span>
-                        <span>budget {scenario.definition.latency_budget_ms ?? 5000} ms</span>
+                        <span className="font-mono">budget {scenario.definition.latency_budget_ms ?? 5000}ms</span>
                         <button
-                          className="ml-auto text-emerald-400 hover:underline"
+                          className="ml-auto flex items-center gap-1 text-emerald-400 transition-colors hover:text-emerald-300"
                           onClick={() => setExpanded(expanded === scenario.id ? null : scenario.id)}
                           aria-expanded={expanded === scenario.id}
                         >
-                          {expanded === scenario.id ? "Hide script" : "View script"}
+                          {expanded === scenario.id ? (
+                            <>
+                              Hide script <CaretUp size={11} weight="bold" />
+                            </>
+                          ) : (
+                            <>
+                              View script <CaretDown size={11} weight="bold" />
+                            </>
+                          )}
                         </button>
                       </div>
                       {expanded === scenario.id && (
-                        <div className="mt-3 space-y-1.5 rounded-lg border border-zinc-800 bg-zinc-950 p-3 font-mono text-[11px] leading-relaxed text-zinc-400">
+                        <div className="mt-3 space-y-1.5 rounded-lg border border-zinc-800/80 bg-zinc-950 p-3.5 font-mono text-[11px] leading-relaxed text-zinc-400">
                           {scenario.definition.steps.map((step, i) => (
-                            <div key={i}>
+                            <div key={i} className="flex gap-2.5">
+                              <span className="w-4 select-none text-right text-zinc-700">{i + 1}</span>
                               <span className="text-emerald-400">
-                                {step.type === "tool_failure" ? "⚑ inject tool failure" : step.type}
+                                {step.type === "tool_failure" ? "inject tool failure" : step.type}
                               </span>
-                              {step.content ? `: ${step.content}` : ""}
+                              {step.content ? <span className="text-zinc-400">: {step.content}</span> : null}
                             </div>
                           ))}
-                          <div className="pt-1 text-zinc-500">
+                          <div className="mt-2 border-t border-zinc-800/60 pt-2 text-zinc-500">
                             expected: {scenario.definition.expected_behavior}
                           </div>
                         </div>
@@ -106,7 +134,7 @@ export default function ScenariosPage() {
 
       <p className="mt-8 text-xs text-zinc-600">
         Start a benchmark from the{" "}
-        <Link href="/runs" className="text-emerald-400 hover:underline">
+        <Link href="/runs" className="text-emerald-400 transition-colors hover:text-emerald-300">
           Test Runs
         </Link>{" "}
         page by selecting an agent and any of these scenarios.

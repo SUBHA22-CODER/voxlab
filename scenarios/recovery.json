@@ -10,7 +10,7 @@
   "expected_behavior": "Agent should gracefully acknowledge the failure on turn two and still answer the return-policy question on turn three.",
   "latency_budget_ms": 8000,
   "checks": [
-    { "type": "reply_contains", "any_of": ["trouble", "sorry", "try again", "human"], "turn": 2 },
+    { "type": "reply_contains", "any_of": ["trouble", "sorry", "try again", "human"], "turn": 1 },
     { "type": "reply_contains", "any_of": ["return", "refund", "30 days"], "turn": -1 },
     { "type": "reply_nonempty", "turn": -1 }
   ]
