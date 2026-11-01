@@ -1,0 +1,16 @@
+{
+  "name": "Interruption Test",
+  "category": "interruption",
+  "description": "User interrupts the agent mid-answer with a new question. The agent should stop, recognize the interruption, and answer it.",
+  "steps": [
+    { "type": "user_message", "content": "Tell me about your services" },
+    { "type": "interrupt", "content": "Wait, explain the pricing first" }
+  ],
+  "expected_behavior": "Agent should handle the interruption and answer the pricing question instead of continuing its previous sentence.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "reply_contains", "any_of": ["pricing", "price", "$", "month"], "turn": -1 },
+    { "type": "reply_not_contains", "any_of": ["as i was saying"], "turn": -1 },
+    { "type": "reply_nonempty", "turn": -1 }
+  ]
+}

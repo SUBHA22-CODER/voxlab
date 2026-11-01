@@ -1,0 +1,14 @@
+{
+  "name": "Ambiguous Cancellation Request",
+  "category": "ambiguity",
+  "description": "User asks to cancel an order without saying which one.",
+  "steps": [
+    { "type": "user_message", "content": "I want to cancel it" }
+  ],
+  "expected_behavior": "Agent should ask a clarifying question (which order / order ID) instead of guessing or refusing.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "reply_nonempty", "turn": -1 },
+    { "type": "reply_contains", "any_of": ["order id", "which order", "could you share"] }
+  ]
+}

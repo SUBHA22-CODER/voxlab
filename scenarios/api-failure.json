@@ -1,0 +1,16 @@
+{
+  "name": "API Failure Graceful Handling",
+  "category": "tool_failure",
+  "description": "The order backend returns an HTTP 500 while the agent is checking an order.",
+  "steps": [
+    { "type": "tool_failure" },
+    { "type": "user_message", "content": "Could you check the status of order ORD-1002?" }
+  ],
+  "expected_behavior": "Agent should apologize, stay composed, and offer a recovery path instead of crashing or going silent.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "reply_nonempty", "turn": -1 },
+    { "type": "reply_contains", "any_of": ["trouble", "sorry", "try again", "human"], "turn": -1 },
+    { "type": "reply_not_contains", "any_of": ["internal error", "traceback", "exception"], "turn": -1 }
+  ]
+}

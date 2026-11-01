@@ -1,0 +1,19 @@
+{
+  "name": "Long Conversation Memory",
+  "category": "long_conversation",
+  "description": "Five-turn conversation mixing topics; the agent must keep order context across unrelated turns.",
+  "steps": [
+    { "type": "user_message", "content": "Hi, I'm looking for help with my order. The ID is ORD-1001." },
+    { "type": "user_message", "content": "What's the status of my order?" },
+    { "type": "user_message", "content": "Got it. What are your return rules?" },
+    { "type": "user_message", "content": "Back to my order — when will it arrive?" },
+    { "type": "user_message", "content": "And can that order still be cancelled?" }
+  ],
+  "expected_behavior": "Agent should use ORD-1001 on every order question without re-asking, and correctly explain the shipped order cannot be cancelled.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "tool_called", "name": "check_order_status" },
+    { "type": "reply_not_contains", "any_of": ["which order is it", "could you share"], "all_turns": true },
+    { "type": "reply_contains", "any_of": ["already shipped", "return it within"], "turn": -1 }
+  ]
+}

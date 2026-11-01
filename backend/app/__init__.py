@@ -1,0 +1,1 @@
+"""VoxLab backend application package."""

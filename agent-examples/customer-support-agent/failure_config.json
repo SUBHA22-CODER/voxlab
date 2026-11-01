@@ -1,0 +1,7 @@
+{
+  "_comment": "Managed via /admin/failure-config",
+  "ignore_interruptions": true,
+  "crash_on_tool_error": true,
+  "forget_context": true,
+  "hinglish_support": false
+}

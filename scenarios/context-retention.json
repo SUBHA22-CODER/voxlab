@@ -1,0 +1,16 @@
+{
+  "name": "Context Retention",
+  "category": "context_retention",
+  "description": "User provides their order ID once, then asks a follow-up that implicitly references it.",
+  "steps": [
+    { "type": "user_message", "content": "Hi! My order ID is ORD-1001 — what's its status?" },
+    { "type": "user_message", "content": "And when exactly will it arrive?" }
+  ],
+  "expected_behavior": "Agent should remember ORD-1001 from the first turn and answer the follow-up without asking for the order ID again.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "tool_called", "name": "check_order_status" },
+    { "type": "reply_not_contains", "any_of": ["could you share", "which order", "order id?"], "turn": -1 },
+    { "type": "reply_nonempty", "turn": -1 }
+  ]
+}

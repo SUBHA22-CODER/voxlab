@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: voxlab
+      POSTGRES_PASSWORD: voxlab
+      POSTGRES_DB: voxlab
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voxlab"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    profiles: ["full"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://voxlab:voxlab@postgres:5432/voxlab
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: change-me-in-production
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      ALLOW_LOCAL_ENDPOINTS: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./scenarios:/app/scenarios:ro
+
+  frontend:
+    build: ./frontend
+    profiles: ["full"]
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  demo-agent:
+    build: ./agent-examples/customer-support-agent
+    profiles: ["full", "demo"]
+    ports:
+      - "8100:8100"
+
+volumes:
+  pgdata:

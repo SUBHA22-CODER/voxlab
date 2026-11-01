@@ -1,0 +1,7 @@
+{
+  "_comment": "The 'fixed' configuration — copy over failure_config.json (or POST to /admin/failure-config) to make the demo agent pass its benchmark.",
+  "ignore_interruptions": false,
+  "crash_on_tool_error": false,
+  "forget_context": false,
+  "hinglish_support": true
+}

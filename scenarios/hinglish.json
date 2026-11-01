@@ -1,0 +1,15 @@
+{
+  "name": "Hinglish Understanding",
+  "category": "language",
+  "description": "User writes in mixed Hindi-English (Hinglish), a very common pattern for Indian support callers.",
+  "steps": [
+    { "type": "user_message", "content": "Mera order kab aayega? Order ID ORD-1001 hai" }
+  ],
+  "expected_behavior": "Agent should understand the Hinglish request and answer with the order status, not refuse the language.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "reply_not_contains", "any_of": ["only understand english"] },
+    { "type": "tool_called", "name": "check_order_status" },
+    { "type": "reply_contains", "any_of": ["ord-1001", "shipped", "november"], "turn": -1 }
+  ]
+}

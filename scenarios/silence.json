@@ -1,0 +1,15 @@
+{
+  "name": "Unexpected Silence",
+  "category": "conversation",
+  "description": "User goes silent mid-conversation, as callers often do when checking something.",
+  "steps": [
+    { "type": "user_message", "content": "Hi" },
+    { "type": "silence" }
+  ],
+  "expected_behavior": "Agent should gently prompt the user to continue instead of hanging up or crashing.",
+  "latency_budget_ms": 8000,
+  "checks": [
+    { "type": "reply_nonempty", "turn": -1 },
+    { "type": "latency_under", "ms": 8000 }
+  ]
+}
