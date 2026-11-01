@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   PolarAngleAxis,
@@ -130,12 +130,6 @@ function RadarTooltip({
 
 /** Lighthouse-style metric rows: chip, label + weight, animated track, value. */
 function ComponentBars({ summary }: { summary: ReportSummary }) {
-  const [mounted, setMounted] = useState(false);
-  // Flip after first paint so the width transition runs on entry.
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 40);
-    return () => clearTimeout(timer);
-  }, []);
   return (
     <div className="space-y-4">
       {Object.entries(summary.components).map(([key, value]) => {
@@ -156,13 +150,20 @@ function ComponentBars({ summary }: { summary: ReportSummary }) {
                 weight {weight !== undefined ? weight.toFixed(2) : "0.00"}
               </p>
             </div>
-            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full border border-zinc-800/60 bg-zinc-900/80 shadow-[inset_0_1px_2px_rgb(0_0_0/0.5)]">
+            <div
+              className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full border border-zinc-800 bg-zinc-900 shadow-[inset_0_1px_2px_rgb(0_0_0/0.5)]"
+              role="meter"
+              aria-valuenow={Math.round(value)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`${COMPONENT_NAMES[key] ?? key} score`}
+            >
               <div
-                className="h-full rounded-full"
+                className="grow-x h-full rounded-full"
                 style={{
-                  width: mounted ? `${Math.min(100, value)}%` : "0%",
-                  background: `linear-gradient(90deg, ${color}66, ${color})`,
-                  transition: "width 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
+                  width: `${Math.max(2, Math.min(100, value))}%`,
+                  background: `linear-gradient(90deg, ${color}55, ${color})`,
+                  boxShadow: `0 0 8px ${color}40`,
                 }}
               />
             </div>

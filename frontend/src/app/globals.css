@@ -146,8 +146,19 @@ body::after {
   animation: eq 1.5s ease-in-out infinite;
 }
 
+/* Metric bar fills grow from the left on entry (final width set inline). */
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.grow-x {
+  transform-origin: left center;
+  animation: grow-x 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .skeleton, .live-dot, .eq-bar { animation: none; }
   .rise { animation: none; }
+  .grow-x { animation: none; }
   .spotlight::before { transition: none; }
 }

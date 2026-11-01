@@ -3,28 +3,31 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChartBar, Pulse, TrendUp } from "@phosphor-icons/react";
+import { ArrowRight, ChartBar, Lightning, Pulse, TrendUp } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth-context";
 import { Button, Input, Label } from "@/components/ui";
 import { BrandMark } from "@/components/brand";
 
 const WAVEFORM = [
-  0.35, 0.7, 0.45, 0.9, 0.6, 1.0, 0.5, 0.8, 0.4, 0.95, 0.55, 0.75, 0.3, 0.85, 0.5, 0.7, 0.45,
-  0.9, 0.6, 0.4, 0.8, 0.35, 0.65, 0.95, 0.5, 0.75, 0.4, 0.85,
+  0.3, 0.55, 0.8, 0.5, 0.95, 0.65, 1.0, 0.45, 0.75, 0.55, 0.9, 0.4, 0.7, 1.0, 0.5, 0.85, 0.6,
+  0.4, 0.95, 0.5, 0.75, 0.6, 1.0, 0.45, 0.8, 0.55, 0.9, 0.35,
 ];
 
 const FEATURES = [
   {
     icon: Pulse,
-    text: "Scenario stress tests: interruptions, API failures, Hinglish, memory probes",
+    title: "Stress-test scenarios",
+    text: "Interruptions, API failures, Hinglish, memory probes - shipped built in",
   },
   {
     icon: ChartBar,
-    text: "Every conversation traced turn by turn with pipeline-level timings",
+    title: "Turn-level tracing",
+    text: "STT, LLM, tools and TTS timed separately for every single turn",
   },
   {
     icon: TrendUp,
-    text: "Transparent weighted benchmarks you can compare across runs",
+    title: "Benchmarks you can trust",
+    text: "Transparent weighted scores, comparable across runs and agents",
   },
 ];
 
@@ -36,12 +39,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function signIn(emailValue: string, passwordValue: string) {
     setBusy(true);
     setError(null);
     try {
-      await login(email, password);
+      await login(emailValue, passwordValue);
       router.replace("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -49,13 +51,18 @@ export default function LoginPage() {
     }
   }
 
+  function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    void signIn(email, password);
+  }
+
   return (
     <main className="grid min-h-[100dvh] lg:grid-cols-2">
       {/* Brand panel */}
-      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-zinc-800/60 bg-zinc-950/60 p-12 lg:flex">
+      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-zinc-800/60 bg-zinc-950/70 p-12 xl:p-16">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-24 -top-32 h-96 w-96 rounded-full bg-emerald-500/[0.1] blur-[120px]" />
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-teal-500/[0.06] blur-[100px]" />
+          <div className="absolute -left-24 -top-32 h-96 w-96 rounded-full bg-emerald-500/[0.12] blur-[130px]" />
+          <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-teal-500/[0.06] blur-[110px]" />
         </div>
 
         <div className="rise relative flex items-center gap-3">
@@ -65,34 +72,47 @@ export default function LoginPage() {
           </span>
         </div>
 
-        <div className="rise rise-1 relative max-w-md">
-          <h1 className="text-[34px] font-semibold leading-[1.15] tracking-[-0.02em] text-zinc-50">
-            Know if your voice agent survives real conversations.
+        <div className="rise rise-1 relative max-w-lg">
+          <h1 className="text-[36px] font-semibold leading-[1.12] tracking-[-0.025em] text-zinc-50">
+            Know if your voice agent survives{" "}
+            <span className="bg-gradient-to-r from-emerald-300 to-teal-200 bg-clip-text text-transparent">
+              real conversations
+            </span>
+            .
           </h1>
-          <p className="mt-4 text-[15px] leading-relaxed text-zinc-400">
-            Build voice agents. Break them. Benchmark them. VoxLab finds the exact
-            turn where your agent falls apart, and proves when a fix works.
+          <p className="mt-5 text-[15px] leading-relaxed text-zinc-400">
+            VoxLab runs hostile scenarios against your agent, traces the exact turn
+            where it breaks, and proves when a fix actually works.
           </p>
 
-          <div className="mt-9 flex h-14 items-end gap-[5px]" aria-hidden>
-            {WAVEFORM.map((h, i) => (
-              <span
-                key={i}
-                className="eq-bar w-1.5 shrink-0 rounded-full bg-gradient-to-t from-emerald-500/30 to-emerald-400/80"
-                style={{
-                  height: `${h * 100}%`,
-                  animationDelay: `${i * 0.09}s`,
-                  animationDuration: `${1.3 + (i % 5) * 0.22}s`,
-                }}
-              />
-            ))}
+          <div className="relative mt-10">
+            <div aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-zinc-800/80" />
+            <div className="relative flex h-20 items-center gap-[6px]">
+              {WAVEFORM.map((h, i) => (
+                <span
+                  key={i}
+                  aria-hidden
+                  className="eq-bar w-2 shrink-0 rounded-full bg-gradient-to-t from-emerald-600/40 to-emerald-300 shadow-[0_0_14px_rgb(52_211_153/0.3)]"
+                  style={{
+                    height: `${h * 100}%`,
+                    animationDelay: `${i * 0.08}s`,
+                    animationDuration: `${1.3 + (i % 5) * 0.22}s`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
-          <ul className="mt-9 space-y-3.5">
-            {FEATURES.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-start gap-3 text-[13px] leading-relaxed text-zinc-400">
-                <Icon size={16} weight="duotone" className="mt-0.5 shrink-0 text-emerald-400" />
-                {text}
+          <ul className="mt-10 space-y-5">
+            {FEATURES.map(({ icon: Icon, title, text }) => (
+              <li key={title} className="flex items-start gap-3.5">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/80 text-emerald-400">
+                  <Icon size={15} weight="duotone" />
+                </span>
+                <div>
+                  <p className="text-[13px] font-medium text-zinc-200">{title}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">{text}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -161,6 +181,20 @@ export default function LoginPage() {
                 {!busy && <ArrowRight size={14} weight="bold" />}
               </Button>
             </form>
+            <div className="my-4 flex items-center gap-3" aria-hidden>
+              <span className="h-px flex-1 bg-zinc-800" />
+              <span className="text-[10px] uppercase tracking-wider text-zinc-600">or</span>
+              <span className="h-px flex-1 bg-zinc-800" />
+            </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              disabled={busy}
+              onClick={() => void signIn("demo@voxlab.dev", "demo1234")}
+            >
+              <Lightning size={13} weight="fill" />
+              Explore with the demo account
+            </Button>
           </div>
 
           <p className="mt-5 text-center text-xs text-zinc-600">
@@ -168,8 +202,6 @@ export default function LoginPage() {
             <Link href="/register" className="text-emerald-400 transition-colors hover:text-emerald-300">
               Register
             </Link>
-            <span className="mx-1.5 text-zinc-700">·</span>
-            Demo: demo@voxlab.dev / demo1234
           </p>
         </div>
       </section>
