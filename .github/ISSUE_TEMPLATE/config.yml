@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Reporting
+    url: https://github.com/SUBHA22-CODER/voxlab/security
+    about: Privately disclose sensitive security vulnerabilities.
+  - name: Documentation & System Architecture
+    url: https://github.com/SUBHA22-CODER/voxlab/tree/main/docs
+    about: Read comprehensive guides on Darwin, architecture, and deployment.

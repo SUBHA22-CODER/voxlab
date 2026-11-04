@@ -1,0 +1,54 @@
+name: "Bug Report"
+description: "File an issue about a bug or defect in VoxLab"
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please provide as much detail as possible.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the defect encountered...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the behavior.
+      placeholder: |
+        1. Start demo agent on port 8100
+        2. Execute scenario 'customer_support_happy_path'
+        3. See error in evaluation trace...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      options:
+        - "Darwin Evolutionary Fuzzing"
+        - "Evaluation Engine"
+        - "Scenario Runner"
+        - "Agent Registry / WebSockets"
+        - "Frontend UI / Dashboard"
+        - "Docker / Deployment"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Environment & Logs
+      description: OS version, Python version, Node version, and backend terminal logs.
+      render: shell

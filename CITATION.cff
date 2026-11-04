@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use VoxLab or the Darwin Evolutionary Fuzzing Engine in academic or industrial research, please cite it as below."
+authors:
+  - family-names: "Parida"
+    given-names: "Subha Prasana"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+title: "VoxLab: Automated Reliability, Evolutionary Fuzzing, and Crash-Testing Infrastructure for Voice AI Agents"
+version: 0.1.0
+date-released: 2026-11-04
+url: "https://github.com/SUBHA22-CODER/voxlab"
+repository-code: "https://github.com/SUBHA22-CODER/voxlab"
+keywords:
+  - "voice-agents"
+  - "ai-reliability"
+  - "evolutionary-fuzzing"
+  - "genetic-algorithms"
+  - "wispr-flow"
+  - "speech-to-text"
+  - "delta-debugging"
+license: "MIT"
