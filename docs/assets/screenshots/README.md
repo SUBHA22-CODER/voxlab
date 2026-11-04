@@ -16,3 +16,4 @@ This directory contains real, high-resolution (1440 × 900) screenshots captured
 ---
 
 *Captured automatically using Playwright with Microsoft Edge at 1440 × 900 viewport on local test environment.*
+
