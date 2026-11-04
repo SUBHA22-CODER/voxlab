@@ -6,14 +6,18 @@ Welcome to the VoxLab engineering documentation. VoxLab is an automated reliabil
 
 ## Documentation Directory
 
-### Architecture & System Design
+### Product, Architecture & Planning
 - [Product Requirements Document (PRD)](PRD.md)
+- [Engineering Plan & Roadmap](PLAN.md)
 - [Vision & North Star](VISION.md)
+- [Implementation Tasks & Checklist](TASKS.md)
 - [System Architecture](architecture.md)
 - [System Design & Component Lifecycle](SYSTEM_DESIGN.md)
 - [Data Model & Database Schema](DATA_MODEL.md)
+- [Architectural Decisions (ADRs)](DECISIONS.md)
+- [Configuration Reference](CONFIGURATION.md)
+- [Local Development Setup](DEVELOPMENT_SETUP.md)
 - [API Reference](api-reference.md)
-- [Configuration & Environment Variables](CONFIGURATION.md)
 - [Observability, Tracing & Metrics](OBSERVABILITY.md)
 - [Evaluation Methodology](evaluation-methodology.md)
 

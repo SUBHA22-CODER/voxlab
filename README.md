@@ -13,7 +13,7 @@
 [![Tailored for Wispr Flow](https://img.shields.io/badge/Tailored%20for-Wispr%20Flow-6366f1.svg)](https://wisprflow.ai)
 [![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)
 
-[Documentation](docs/) • [System Architecture](docs/architecture.md) • [Darwin Engine](docs/DARWIN_ENGINE.md) • [API Reference](https://voxlab-2.onrender.com/docs) • [Contributing](CONTRIBUTING.md)
+[Documentation](docs/) • [PRD](docs/PRD.md) • [Plan](docs/PLAN.md) • [Architecture](docs/architecture.md) • [Darwin Engine](docs/DARWIN_ENGINE.md) • [API Reference](https://voxlab-2.onrender.com/docs) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -334,6 +334,27 @@ docker-compose up --build
 * **Backend API:** Connect the repository to Render and use the root [`Dockerfile`](Dockerfile).
 * **Frontend UI:** Deploy as a Node.js Web Service pointing to `frontend/` directory with `NEXT_PUBLIC_API_URL=https://<your-backend-url>`.
 * **Automated Blueprint:** A production [`render.yaml`](render.yaml) is included for 1-click multi-service deployment.
+
+---
+
+## 📚 Product, Planning & Architecture Hub
+
+All core product specifications, strategic roadmaps, architecture definitions, and technical plans are centralized in [`docs/`](docs/):
+
+| Document | Focus & Scope | Link |
+| :--- | :--- | :---: |
+| **Product Requirements (PRD)** | Problem statement, user personas, functional specifications, and MVP criteria. | [📄 PRD.md](docs/PRD.md) |
+| **Engineering Plan & Roadmap** | Strategic implementation phases, architecture milestones, and delivery timeline. | [🗺️ PLAN.md](docs/PLAN.md) |
+| **Strategic Vision** | Product philosophy, voice failure taxonomy, and North Star principles. | [🔭 VISION.md](docs/VISION.md) |
+| **System Architecture** | Component contracts, end-to-end data flow, and sequence diagrams. | [🏗️ architecture.md](docs/architecture.md) |
+| **System Design & Lifecycle** | Database isolation, concurrency rules, and background workers. | [⚙️ SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md) |
+| **Implementation Tasks** | Granular task backlog, acceptance criteria, and completion checklist. | [✅ TASKS.md](docs/TASKS.md) |
+| **Data Model & Schema** | Database entities, relationships, table schemas, and indexing. | [🗄️ DATA_MODEL.md](docs/DATA_MODEL.md) |
+| **Darwin Fuzzing Guide** | Genetic operators, evolutionary selection, fitness math, and ddmin algorithms. | [🧬 DARWIN_ENGINE.md](docs/DARWIN_ENGINE.md) |
+| **Testing Strategy** | Multi-layered testing pyramid, coverage reports, and execution guides. | [🧪 TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
+| **Security & Threat Model** | Threat matrix, AES-GCM credential encryption, and vulnerability disclosure policy. | [🔒 THREAT_MODEL.md](docs/security/THREAT_MODEL.md) |
+| **Configuration Reference** | Environment variables, defaults, and security configurations. | [⚙️ CONFIGURATION.md](docs/CONFIGURATION.md) |
+| **Development Setup** | Local environment setup, demo agent ports, and quickstart commands. | [💻 DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md) |
 
 ---
 
