@@ -11,6 +11,7 @@
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.4.3-black.svg)](https://nextjs.org)
 [![Pytest](https://img.shields.io/badge/Pytest-109%20Passed-emerald.svg)](backend/tests/)
 [![Tailored for Wispr Flow](https://img.shields.io/badge/Tailored%20for-Wispr%20Flow-6366f1.svg)](https://wisprflow.ai)
+[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)
 
 [Documentation](docs/) • [System Architecture](docs/architecture.md) • [Darwin Engine](docs/DARWIN_ENGINE.md) • [API Reference](https://voxlab-2.onrender.com/docs) • [Contributing](CONTRIBUTING.md)
 
@@ -156,6 +157,8 @@ sequenceDiagram
 ---
 
 ## 🏗️ System Architecture
+
+[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)
 
 ```mermaid
 flowchart TD
