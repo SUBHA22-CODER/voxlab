@@ -75,6 +75,16 @@ def create_app() -> FastAPI:
             content={"detail": "Internal server error"},
         )
 
+    @app.get("/", tags=["root"])
+    async def root() -> dict:
+        return {
+            "name": "VoxLab API & Darwin Fuzzing Engine",
+            "status": "online",
+            "version": "0.1.0",
+            "docs_url": "/docs",
+            "health_url": "/api/health",
+        }
+
     @app.get("/api/health", tags=["health"])
     async def health() -> dict:
         return {
