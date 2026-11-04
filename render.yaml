@@ -1,0 +1,30 @@
+services:
+  # 1. FastAPI Backend API Service
+  - type: web
+    name: voxlab-backend
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./voxlab.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "http://localhost:3000,https://*.onrender.com,https://*.vercel.app"
+
+  # 2. Next.js 16 Frontend Web Application
+  - type: web
+    name: voxlab-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    plan: free
+    region: oregon
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://voxlab-2.onrender.com
+      - key: NODE_ENV
+        value: production
