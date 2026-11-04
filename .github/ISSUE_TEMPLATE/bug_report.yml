@@ -52,3 +52,4 @@ body:
       label: Environment & Logs
       description: OS version, Python version, Node version, and backend terminal logs.
       render: shell
+

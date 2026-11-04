@@ -25,3 +25,4 @@ Implemented in `backend/app/darwin/minimizer.py`, Delta Debugging simplifies the
 ### Typical Results
 - **Original Attack:** 8-10 turns containing conversational noise.
 - **Minimized Finding:** 1-2 turns containing only the critical phonetic confusion or self-correction trigger.
+

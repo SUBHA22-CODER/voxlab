@@ -30,3 +30,4 @@ cd frontend
 npm run build
 ```
 Ensure build compiles with zero TypeScript or Webpack errors.
+

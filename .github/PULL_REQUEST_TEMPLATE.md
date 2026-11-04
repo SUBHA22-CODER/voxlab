@@ -17,3 +17,4 @@ Resolves #
 - [ ] I have added tests that prove my fix is effective or that my feature works.
 - [ ] All new and existing tests passed (`pytest` in backend, `npm run build` in frontend).
 - [ ] No secrets, `.env` files, or API keys are committed.
+

@@ -28,3 +28,4 @@ Instead of engineers handcrafting hundreds of edge cases:
 1. **Zero External Lock-In:** Full local evaluation via deterministic heuristic scoring engines; cloud LLMs enhance evaluations but are never mandatory.
 2. **Safe Exploration Boundaries:** Hard budget caps (maximum 60 sessions per Darwin campaign) ensure no runaway cloud bills or target denial of service.
 3. **Turn Bugs into Permanent Shields:** Every discovered failure is automatically exportable as a standardized JSON scenario that runs in GitHub Actions CI on every pull request.
+

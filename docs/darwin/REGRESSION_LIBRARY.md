@@ -31,3 +31,4 @@ In `backend/app/darwin/regression.py`, the finding is converted to a version-con
 
 ### 3. CI Gate
 These scenarios execute automatically in GitHub Actions CI (`pytest backend/tests/test_darwin_integration.py`), failing the PR build if the agent ever regresses.
+

@@ -31,3 +31,4 @@ All environment variables used across backend, frontend, and demo agents are doc
 - Never commit `.env` or `.env.local` files to version control.
 - In production, replace `JWT_SECRET` and `ENCRYPTION_KEY` with cryptographically secure random values.
 - If no external LLM API key is supplied, VoxLab seamlessly activates its deterministic NLP heuristic evaluators.
+

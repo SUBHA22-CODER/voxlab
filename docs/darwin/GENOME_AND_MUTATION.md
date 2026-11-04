@@ -32,3 +32,4 @@ class Genome:
 3. **Swap Turns (`MUTATE_SWAP_TURNS`):** Transposes two consecutive turns to test conversation history dependency.
 4. **Hesitation Mutation (`MUTATE_HESITATION`):** Jitters inter-word hesitation pause length (0 to 3000 ms).
 5. **Utterance Perturbation:** Injects fillers (*"um, actually"*) or homophones (*"four" -> "for"*).
+

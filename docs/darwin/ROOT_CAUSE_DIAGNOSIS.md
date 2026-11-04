@@ -28,3 +28,4 @@ When an LLM judge is configured (or via deterministic pattern templates), the di
 - **Root Cause Summary:** Clear explanation of why the failure occurred.
 - **System Prompt Patch Proposal:** Targeted adjustment to system prompt or formatting rules.
 - **Verification (`POST /api/darwin/findings/{id}/verify-patch`):** Executes the minimized scenario using the proposed system prompt in a test sandbox and measures score improvement before and after.
+

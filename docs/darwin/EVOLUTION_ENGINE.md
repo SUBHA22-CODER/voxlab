@@ -29,3 +29,4 @@ The evolution loop in `backend/app/darwin/evolution.py` controls population dyna
 5. **Budget Cap Enforcement:**
    - Total executions are capped at `min(pop_size * generations, 60)`.
    - Prevents memory leaks, excessive network traffic, and API exhaustion.
+

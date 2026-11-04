@@ -30,3 +30,4 @@ $$\text{Fitness} = 1.0 - \frac{\text{Overall Score}}{100.0}$$
 - Agent Score = 100% $\to$ Fitness = 0.0 (Attack Failed)
 - Agent Score = 20% $\to$ Fitness = 0.8 (Strong Attack Found)
 - Agent Score = 0% $\to$ Fitness = 1.0 (Critical Crash / Failure)
+

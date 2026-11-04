@@ -21,3 +21,4 @@ sequenceDiagram
     Core->>Crypt: Encrypt credential with ENCRYPTION_KEY
     Crypt->>DB: Store encrypted ciphertext only
 ```
+

@@ -49,3 +49,4 @@ python -m pytest -v
 cd frontend
 npm run build
 ```
+

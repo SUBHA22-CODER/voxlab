@@ -36,3 +36,4 @@ Instead, please report vulnerabilities by contacting the maintainers through a P
 - **Secret Handling:** API keys and provider tokens are encrypted at rest using AES-GCM and never logged in plain text or emitted over WebSockets.
 - **Target Boundaries:** Darwin evolutionary fuzzing operates strictly against user-configured HTTP/WebSocket voice endpoints within local or approved VPC networks. Darwin contains a hard session budget cap (60 sessions) to prevent denial of service.
 - **Deterministic Fallbacks:** The platform maintains local deterministic heuristic evaluators that function without transmitting agent transcript data to third-party cloud LLMs unless explicitly configured.
+

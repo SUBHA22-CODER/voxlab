@@ -45,3 +45,4 @@ flowchart TD
 
 3. **In-Process Task Dispatch:**
    - Long-running Darwin runs are dispatched to an async worker queue in `backend/app/darwin/evolution.py`, allowing client requests to poll progress or cancel anytime via `POST /api/darwin/runs/{id}/cancel`.
+

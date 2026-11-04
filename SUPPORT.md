@@ -27,3 +27,4 @@ For general questions, troubleshooting agent connectivity, or sharing custom Dar
 | **Agent connection refused** | Ensure demo agent processes are started on ports 8100/8200 (`python -m uvicorn main:app --port 8100`). |
 | **Darwin shows 100% flat fitness** | Agent endpoint is offline or returning 500 errors. Verify agent health before launching campaign. |
 | **Database is locked** | Avoid concurrent write operations or running external blocking calls inside SQLite transactions. |
+

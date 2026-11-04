@@ -28,3 +28,4 @@ services:
         value: https://voxlab-2.onrender.com
       - key: NODE_ENV
         value: production
+

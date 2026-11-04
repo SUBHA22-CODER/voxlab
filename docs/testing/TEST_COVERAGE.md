@@ -37,3 +37,4 @@ tests/test_evaluation.py ...................................              [100%]
 | **Darwin Fuzzing Engine** | `app/darwin/evolution.py`, `app/darwin/genome.py` | 100% |
 | **Delta Debugging Minimizer** | `app/darwin/minimizer.py` | 100% |
 | **Wispr Flow Cleaner Agent** | `agent-examples/dictation-agent/` | 100% |
+

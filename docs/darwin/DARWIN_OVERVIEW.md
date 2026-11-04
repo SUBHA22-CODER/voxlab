@@ -49,3 +49,4 @@ Instead of relying on fixed human-authored test scripts, Darwin treats test scen
 3. **Filler & Hesitation Injector:** Floods pipeline with realistic conversational disfluencies (*"um"*, *"uh"*, *"like"*).
 4. **Barge-in Interrupter:** Fires user utterances before agent finishes speaking to test turn-taking state machines.
 5. **Context Switcher:** Abruptly shifts domain context and re-queries earlier conversational slots.
+

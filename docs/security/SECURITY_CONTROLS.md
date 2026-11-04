@@ -11,3 +11,4 @@
 ## 3. Sandboxed Execution & Timeouts
 - All external HTTP calls made by `ScenarioRunner` to voice agents enforce strict connection and read timeouts (default 10s).
 - Broken or non-responsive agents fail fast rather than hanging background worker queues.
+

@@ -9,3 +9,4 @@
 | **Transcript & PII Leakage** | Evaluation traces & transcript logs | Sensitive customer voice transcripts exposed to unauthorized users. | Scoped tenant isolation (`user_id` enforced on all ORM queries). | Automated PII masking before saving transcript records. |
 | **Credential / API Key Exposure** | Voice provider tokens & LLM API keys | Leaked keys lead to unauthorized cloud API usage. | Encrypted via AES-GCM at rest; excluded from API output schemas. | Hardware Security Module (HSM) or HashiCorp Vault backend. |
 | **Prompt Injection via Attack Personas** | Darwin persona utterances sent to target agent | Attacker crafts persona that exfiltrates system prompt. | Agent responses evaluated against forbidden output patterns. | System prompt boundary delimiters and guardrail filters. |
+

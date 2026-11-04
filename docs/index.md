@@ -40,3 +40,4 @@ Welcome to the VoxLab engineering documentation. VoxLab is an automated reliabil
 
 ### Architectural Decisions
 - [Architecture Decision Record (ADR) Template](decisions/ADR_TEMPLATE.md)
+

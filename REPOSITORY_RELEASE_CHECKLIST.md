@@ -31,3 +31,4 @@
 - [x] `CITATION.cff` for academic / industrial citations.
 - [x] `.editorconfig` and `.gitattributes` for cross-platform consistency.
 - [x] GitHub Actions CI, Lint, and Security workflows active in `.github/workflows/`.
+

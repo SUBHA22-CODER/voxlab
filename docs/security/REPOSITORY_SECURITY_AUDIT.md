@@ -28,3 +28,4 @@ A comprehensive security and credential audit was performed across the entire Gi
 1. Sanitized `.env.example` to ensure zero real credentials are exposed to public clones.
 2. Verified `.gitignore` pattern matching for `**/.env*`, `backend/voxlab.db*`, and `frontend/.next/`.
 3. Created automated GitHub Actions secret scanning workflow using Gitleaks and pip-audit.
+
