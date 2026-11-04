@@ -149,3 +149,8 @@ class Report(Base):
     score: Mapped[float] = mapped_column(Float)
     summary: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+# Darwin fuzzing & evolution models
+from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun  # noqa: E402
+

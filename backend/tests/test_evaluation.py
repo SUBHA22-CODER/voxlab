@@ -25,7 +25,7 @@ def make_output(**overrides) -> RunOutput:
 
 
 def make_engine() -> EvaluationEngine:
-    return EvaluationEngine(LLMService(), default_latency_budget_ms=1000)
+    return EvaluationEngine(LLMService(api_key=""), default_latency_budget_ms=1000)
 
 
 class TestDeterministicChecks:

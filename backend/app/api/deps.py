@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import SessionLocal
 from app.core.security import decode_access_token
+from app.darwin.evolution import EvolutionEngine
 from app.engine.orchestrator import Orchestrator
 from app.models import Agent, User
 
@@ -16,6 +17,7 @@ bearer = HTTPBearer(auto_error=False)
 
 # Single in-process orchestrator instance (swap for queue dispatch via workers).
 orchestrator = Orchestrator(SessionLocal)
+evolution_engine = EvolutionEngine(SessionLocal)
 
 
 async def get_db() -> AsyncSession:

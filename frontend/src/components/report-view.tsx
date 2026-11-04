@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   PolarAngleAxis,
@@ -224,6 +224,108 @@ export function FailuresList({ summary }: { summary: ReportSummary }) {
   );
 }
 
+/** Shorten a scenario name for radar axis labels without hiding its identity. */
+function shortName(name: string): string {
+  if (name.length <= 14) return name;
+  let out = "";
+  for (const word of name.split(" ")) {
+    if (`${out} ${word}`.trim().length > 13) break;
+    out = `${out} ${word}`.trim();
+  }
+  return out || name.slice(0, 13);
+}
+
+function scenarioTick(data: Array<{ name: string; passed: boolean }>) {
+  // Recharts hands custom tick renderers internal positioning props that are
+  // not part of its public types, hence the loose parameter below.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function Tick(props: any): ReactNode {
+    const x = typeof props.x === "number" ? props.x : 0;
+    const y = typeof props.y === "number" ? props.y : 0;
+    const textAnchor: "middle" | "start" | "end" =
+      props.textAnchor === "start" || props.textAnchor === "end" ? props.textAnchor : "middle";
+    const value = String(props.payload?.value ?? "");
+    const entry = data.find((d) => d.name === value);
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor={textAnchor}
+        fontSize={10}
+        fontWeight={500}
+        fill={entry?.passed ? "#9ca3af" : "#f87171"}
+      >
+        {value}
+      </text>
+    );
+  };
+}
+
+function ScenarioTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: { fullName: string; value: number; passed: boolean } }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const { fullName, value, passed } = payload[0].payload;
+  return (
+    <div className="rounded-lg border border-zinc-700/80 bg-zinc-900 px-3 py-2 shadow-[0_8px_24px_rgb(0_0_0/0.4)]">
+      <p className="text-[11px] font-medium text-zinc-300">{fullName}</p>
+      <p className="mt-0.5 font-mono text-sm tabular-nums">
+        <span className={passed ? "text-emerald-300" : "text-red-300"}>{value.toFixed(1)}</span>
+        <span className="ml-2 text-[10px] uppercase tracking-wider text-zinc-500">
+          {passed ? "passed" : "failed"}
+        </span>
+      </p>
+    </div>
+  );
+}
+
+/** Web graph with one axis per scenario, labeled red when it failed. */
+function ScenarioRadar({ summary }: { summary: ReportSummary }) {
+  const data = summary.per_session.map((s) => ({
+    name: shortName(s.scenario_name),
+    fullName: s.scenario_name,
+    value: s.overall ?? 0,
+    passed: s.passed,
+  }));
+  return (
+    <Card className="rise rise-2 lg:col-span-2">
+      <CardHeader className="flex items-center justify-between">
+        <span>Scenario coverage</span>
+        <span className="font-mono text-[11px] tabular-nums text-zinc-500">
+          {summary.totals.passed}/{summary.totals.sessions} passed
+        </span>
+      </CardHeader>
+      <CardBody className="pb-3">
+        <div className="mx-auto h-[250px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart data={data} cx="50%" cy="50%" outerRadius="68%">
+              <PolarGrid stroke="#202024" />
+              <PolarAngleAxis dataKey="name" tick={scenarioTick(data)} />
+              <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+              <Radar
+                dataKey="value"
+                stroke="#34d399"
+                strokeWidth={2}
+                fill="#34d399"
+                fillOpacity={0.16}
+                style={{ filter: "drop-shadow(0 0 6px rgb(52 211 153 / 0.25))" }}
+              />
+              <Tooltip content={<ScenarioTooltip />} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="text-center text-[11px] text-zinc-600">
+          One axis per scenario, scored 0 to 100. Failed scenarios are labeled in red.
+        </p>
+      </CardBody>
+    </Card>
+  );
+}
+
 export function ReportView({ summary, runId }: { summary: ReportSummary; runId: number }) {
   const [compareId, setCompareId] = useState("");
   const [comparison, setComparison] = useState<Awaited<ReturnType<typeof Reports.compare>> | null>(null);
@@ -313,11 +415,12 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
             </p>
           </CardBody>
         </Card>
-      </div>
 
-      <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
-          <span>Failures and diagnosis</span>
+        <ScenarioRadar summary={summary} />
+
+        <Card className="lg:col-span-3">
+          <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+            <span>Failures and diagnosis</span>
           <span className="flex items-center gap-2">
             <select
               value={compareId}
@@ -341,7 +444,8 @@ export function ReportView({ summary, runId }: { summary: ReportSummary; runId: 
           {comparison && <ComparisonStrip comparison={comparison} />}
           <FailuresList summary={summary} />
         </CardBody>
-      </Card>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>Per-scenario results</CardHeader>

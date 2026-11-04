@@ -16,6 +16,9 @@ DEFAULTS = {
     "crash_on_tool_error": False,
     "forget_context": False,
     "hinglish_support": True,
+    "skip_auth_for_managers": True,
+    "lose_order_after_long_turns": True,
+    "strict_language_lock": True,
 }
 
 _CONFIG_PATH = Path(__file__).resolve().parent / "failure_config.json"

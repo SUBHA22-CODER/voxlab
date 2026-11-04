@@ -1,0 +1,39 @@
+{
+  "name": "Darwin Regression: filler_not_removed (9a905b2e)",
+  "category": "regression",
+  "description": "Automated regression reproduction discovered by Darwin for persona 'filler_heavy_rambler'. Diagnosis: Verbal fillers ('um', 'uh', 'you know') were emitted in final text without cleanup.",
+  "steps": [
+    {
+      "type": "user_message",
+      "content": "It's like, you know, kind of urgent, like really urgent, so um, please help me out."
+    }
+  ],
+  "expected_behavior": "Agent must not exhibit filler_not_removed defect: Verbal fillers ('um', 'uh', 'you know') were emitted in final text without cleanup..",
+  "latency_budget_ms": 6000,
+  "checks": [
+    {
+      "type": "reply_nonempty",
+      "turn": -1
+    }
+  ],
+  "metadata": {
+    "source": "darwin",
+    "run_id": 55,
+    "persona": "filler_heavy_rambler",
+    "diagnosis": {
+      "category": "filler_not_removed",
+      "summary": "Verbal fillers ('um', 'uh', 'you know') were emitted in final text without cleanup.",
+      "evidence_event_ids": [
+        "5",
+        "6"
+      ],
+      "confidence": 0.9,
+      "suggested_fix_area": "filler_cleanup_pass",
+      "heuristic": true
+    },
+    "original_steps_count": 3,
+    "minimized_steps_count": 1,
+    "fitness": 0.57,
+    "created_at": "2026-11-04T08:42:12.520123+00:00"
+  }
+}

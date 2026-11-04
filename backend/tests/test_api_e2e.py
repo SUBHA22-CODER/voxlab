@@ -107,7 +107,7 @@ class TestAgentRegistry:
             json={"name": "Mine", "endpoint": "https://x.example.com/conv", "agent_type": "http"},
         )
         response = await client.get("/api/agents", headers=other_headers)
-        assert response.json() == []
+        assert not any(a["name"] == "Mine" for a in response.json())
 
 
 class TestBenchmarkFlow:

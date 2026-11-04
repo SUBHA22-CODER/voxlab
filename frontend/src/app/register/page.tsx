@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChartBar, Pulse, TrendUp } from "@phosphor-icons/react";
+import { ArrowRight, ChartBar, Lightning, Pulse, TrendUp } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth-context";
 import { Button, Input, Label } from "@/components/ui";
 import { BrandMark } from "@/components/brand";
@@ -29,8 +29,9 @@ const FEATURES = [
 ];
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const router = useRouter();
+  const [mode, setMode] = useState<"register" | "login">("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -41,10 +42,36 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      await register(email, password);
+      if (mode === "register") {
+        await register(email, password);
+      } else {
+        await login(email, password);
+      }
       router.replace("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(
+        err instanceof Error
+          ? err.message
+          : mode === "register"
+          ? "Registration failed"
+          : "Login failed"
+      );
+      setBusy(false);
+    }
+  }
+
+  async function signInDemo() {
+    setBusy(true);
+    setError(null);
+    try {
+      try {
+        await login("demo@voxlab.dev", "demo123");
+      } catch {
+        await login("demo@voxlab.dev", "demo1234");
+      }
+      router.replace("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Demo sign in failed");
       setBusy(false);
     }
   }
@@ -123,8 +150,47 @@ export default function RegisterPage() {
           </div>
 
           <div className="rounded-xl border border-white/[0.07] bg-zinc-900/60 p-6 shadow-[0_2px_6px_rgb(0_0_0/0.4),0_24px_64px_rgb(0_0_0/0.45),inset_0_1px_0_0_rgb(255_255_255/0.06)] backdrop-blur-xl">
-            <h2 className="text-base font-semibold text-zinc-100">Create your account</h2>
-            <p className="mb-5 mt-1 text-xs text-zinc-500">Free while VoxLab is in open preview.</p>
+            {/* In-page Mode Tabs */}
+            <div className="mb-5 flex rounded-lg border border-zinc-800 bg-zinc-950/80 p-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("register");
+                  setError(null);
+                }}
+                className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
+                  mode === "register"
+                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Create Account
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("login");
+                  setError(null);
+                }}
+                className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
+                  mode === "login"
+                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Already have an account? Sign In
+              </button>
+            </div>
+
+            <h2 className="text-base font-semibold text-zinc-100">
+              {mode === "register" ? "Create your account" : "Welcome back"}
+            </h2>
+            <p className="mb-5 mt-1 text-xs text-zinc-500">
+              {mode === "register"
+                ? "Free while VoxLab is in open preview."
+                : "Sign in to access your testing workspace."}
+            </p>
+
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -142,13 +208,15 @@ export default function RegisterPage() {
                 <Input
                   id="password"
                   type="password"
-                  minLength={8}
+                  minLength={mode === "register" ? 8 : 1}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="new-password"
+                  autoComplete={mode === "register" ? "new-password" : "current-password"}
                   required
                 />
-                <p className="mt-1.5 text-[11px] text-zinc-600">At least 8 characters.</p>
+                {mode === "register" && (
+                  <p className="mt-1.5 text-[11px] text-zinc-600">At least 8 characters.</p>
+                )}
               </div>
               {error && (
                 <p
@@ -159,18 +227,64 @@ export default function RegisterPage() {
                 </p>
               )}
               <Button type="submit" className="w-full" disabled={busy}>
-                {busy ? "Creating account…" : "Create account"}
+                {busy
+                  ? mode === "register"
+                    ? "Creating account…"
+                    : "Signing in…"
+                  : mode === "register"
+                  ? "Create account"
+                  : "Sign in"}
                 {!busy && <ArrowRight size={14} weight="bold" />}
               </Button>
             </form>
+
+            <div className="my-4 flex items-center gap-3" aria-hidden>
+              <span className="h-px flex-1 bg-zinc-800" />
+              <span className="text-[10px] uppercase tracking-wider text-zinc-600">or</span>
+              <span className="h-px flex-1 bg-zinc-800" />
+            </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              disabled={busy}
+              onClick={() => void signInDemo()}
+            >
+              <Lightning size={13} weight="fill" />
+              Explore with the demo account
+            </Button>
           </div>
 
-          <p className="mt-5 text-center text-xs text-zinc-600">
-            Already registered?{" "}
-            <Link href="/login" className="text-emerald-400 transition-colors hover:text-emerald-300">
-              Sign in
-            </Link>
-          </p>
+          <div className="mt-5 text-center text-xs text-zinc-500">
+            {mode === "register" ? (
+              <p>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("login");
+                    setError(null);
+                  }}
+                  className="font-medium text-emerald-400 underline underline-offset-4 transition-colors hover:text-emerald-300"
+                >
+                  Sign in here
+                </button>
+              </p>
+            ) : (
+              <p>
+                Don&apos;t have an account yet?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("register");
+                    setError(null);
+                  }}
+                  className="font-medium text-emerald-400 underline underline-offset-4 transition-colors hover:text-emerald-300"
+                >
+                  Create an account
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </section>
     </main>

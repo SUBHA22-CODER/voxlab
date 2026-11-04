@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   ChartBar,
+  Dna,
   Lightning,
   Microphone,
   Robot,
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/agents", label: "Agents", icon: Robot },
   { href: "/scenarios", label: "Scenarios", icon: Lightning },
   { href: "/runs", label: "Test Runs", icon: ChartBar },
+  { href: "/darwin", label: "Darwin Fuzzing", icon: Dna },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -29,7 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
+    if (!loading && !user) router.replace("/register");
   }, [loading, user, router]);
 
   if (loading) {

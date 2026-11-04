@@ -1,91 +1,73 @@
-# VoxLab Architecture
+# System Architecture: VoxLab & Darwin Engine
 
-VoxLab is the testing, debugging and reliability infrastructure for voice AI
-agents. Developers register an existing agent, run stress scenarios against it,
-inspect full pipeline traces, and receive a transparent benchmark report.
+> **Assumptions:**
+> - Backend runs FastAPI (asynchronous Python 3.11) with SQLAlchemy 2.0 (aiosqlite / asyncpg).
+> - Frontend is Next.js 16 (React 19, Turbopack, Tailwind CSS, Recharts).
+> - Target agents communicate via standardized HTTP JSON schemas (`/conversation`).
+
+---
+
+## 1. High-Level Architecture Diagram
 
 ```
-┌────────────────────┐        ┌─────────────────────────────────────────┐
-│  Next.js Frontend  │  HTTP  │            FastAPI Backend              │
-│  (dashboard,       │◄──────►│  ┌───────────┐   ┌────────────────────┐ │
-│   playground,      │   WS   │  │ API layer │──►│ Orchestrator       │ │
-│   traces, reports) │        │  └───────────┘   │ (in-process worker │ │
-└────────────────────┘        │                  │  or ARQ via Redis) │ │
-                              │  ┌───────────┐   └─────────┬──────────┘ │
-┌────────────────────┐        │  │ Scenario  │   ┌─────────▼──────────┐ │
-│  External Voice    │◄───────┤  │ Engine    │   │ Scenario Runner    │ │
-│  Agent (HTTP/WS)   │ adapter│  └───────────┘   │ (per-session)      │ │
-│  e.g. demo agent   │        │                  └─────────┬──────────┘ │
-└────────────────────┘        │  ┌───────────────────┐     │ events     │
-                              │  │ Evaluation Engine │◄────┤ + traces   │
-                              │  │ deterministic +   │     ▼            │
-                              │  │ LLM judge /       │  PostgreSQL or   │
-                              │  │ heuristic fallback│  SQLite          │
-                              │  └───────────────────┘                  │
-                              └─────────────────────────────────────────┘
++--------------------------------------------------------------------------+
+|                       Next.js Frontend (Port 3000)                       |
+|  - Darwin Dashboard & Charting (Recharts)   - Trace Explorer             |
+|  - Interactive Voice Playground             - Benchmark Test Runner      |
++------------------------------------+-------------------------------------+
+                                     |  HTTP REST / WebSocket
+                                     v
++--------------------------------------------------------------------------+
+|                        FastAPI Backend (Port 8001)                       |
+|  +--------------------+  +----------------------+  +------------------+  |
+|  | Darwin Evolution   |  | Failure Minimizer    |  | Auto-Doctor      |  |
+|  | - Population Gen   |  | - ddmin Algorithm    |  | - Diagnoser      |  |
+|  | - Mutator / Fuzzer |  | - Minimal Repro Extr |  | - Sandbox Verify |  |
+|  +---------+----------+  +----------+-----------+  +--------+---------+  |
+|            |                        |                       |            |
+|            +-------------------+----+-----------------------+            |
+|                                |                                         |
+|                                v                                         |
+|            +----------------------------------------+                    |
+|            | Evaluation Engine & Scorer             |                    |
+|            | - Intent Fidelity & Entity Accuracy    |                    |
+|            | - Cleanup Quality & Formatting Checks  |                    |
+|            +-------------------+--------------------+                    |
++--------------------------------+-----------------------------------------+
+                                 |
+                 +---------------+---------------+
+                 |                               |
+                 v                               v
++----------------------------------+  +------------------------------------+
+| SQLite / PostgreSQL Database     |  | Target Agent Endpoints             |
+| - Users & Auth                   |  | - Wispr Dictation Agent (:8200)    |
+| - Agents & Traces                |  | - Customer Support Agent (:8100)   |
+| - Darwin Runs, Gens, Findings    |  | - Production Custom Webhooks       |
++----------------------------------+  +------------------------------------+
 ```
 
-## Modules (spec §1)
+---
 
-| Module | Where | Responsibility |
-|---|---|---|
-| Agent Registry | `backend/app/api/agents.py`, `models` | Register agents, encrypted credentials, SSRF-guarded endpoints, connection testing |
-| Voice Playground | `backend/app/api/playground.py`, `frontend/.../playground` | Live conversations over WebSocket; text and voice (browser Web Speech API) modes |
-| Scenario Engine | `backend/app/engine/scenario_runner.py` | Execute scripted scenario steps (messages, interrupts, tool-failure injection, silence) through adapters |
-| Observability | `backend/app/engine/trace_collector.py` | Standard event format + per-turn pipeline stage timings, persisted as events + traces |
-| Evaluation Engine | `backend/app/engine/evaluation_engine.py` | Deterministic checks, LLM judge (heuristic fallback), scoring |
-| Reports | `backend/app/engine/reports.py` | Transparent weighted benchmark score, failure diagnosis, run comparison |
+## 2. Component Breakdown
 
-## Adapter layer
+### 2.1 Darwin Evolutionary Engine (`app/darwin/evolution.py`)
+- **Lifecycle:** Asynchronously orchestrated via `asyncio.create_task` with cancellation handles.
+- **Genetic Pipeline:**
+  1. Initialize seed population with selected adversarial personas.
+  2. For each candidate: materialize utterance (LLM or heuristic) -> execute turn against agent -> evaluate output -> compute fitness.
+  3. Survivors selected via truncation selection ($Top-K$).
+  4. Children generated via crossover and mutation operators (`swap_persona`, `inject_interruption`, `inject_api_failure`, `extend_conversation`).
+- **Database Isolation:** DB sessions are short and isolated (<5ms commit window) after HTTP calls complete, avoiding SQLite write lock contention.
 
-`app/adapters/base.py` defines the standard `VoiceAgentAdapter` interface
-(`connect`, `send_message`, `send_audio`, `disconnect`). Every external agent
-framework plugs in through one of:
+### 2.2 Adaptive Attacker (`app/darwin/attacker.py`)
+- Employs an LLM judge prompt conditioned on persona behavior, attack strategy, and prior conversation turns.
+- Includes a 100% offline heuristic generator bank that activates when rate-limited (HTTP 429) or when operating without an API key.
 
-- **HTTP adapter** — request/response contract (see [api-reference.md](api-reference.md))
-- **WebSocket adapter** — streaming JSON frames
+### 2.3 Delta Debugging Minimizer (`app/darwin/minimizer.py`)
+- Implementation of the classic `ddmin` algorithm.
+- Recursively divides multi-turn conversational sequences to isolate the minimal subset of turns that reproduce the adversarial degradation score ($\ge 0.5$).
 
-Adapters normalize provider-specific responses into `AgentTurnResult`
-(reply, tool_calls, state, timings, error). This is what makes VoxLab
-extensible without asking developers to rebuild their agents.
-
-## Event flow in a benchmark run
-
-1. `POST /api/test-runs` validates the request, creates a queued run row.
-2. The orchestrator dispatches an in-process asyncio task (or enqueues to
-   Redis/ARQ when `REDIS_URL` is configured).
-3. Per scenario: a `Session` row is created with a fresh trace id; the runner
-   executes steps through the adapter while the `TraceCollector` records
-   events (user_message, agent_processing, tool_call, agent_message,
-   interruption, error, …) and per-turn pipeline stage durations.
-4. The evaluation engine scores the session (deterministic checks + judge).
-5. After all sessions, a report is generated and the run is marked completed.
-
-Runs are isolated per session; a failing agent cannot poison other sessions.
-
-## Data model (PostgreSQL / SQLite)
-
-users → agents → test_runs → sessions → events / traces / evaluations,
-plus scenarios and reports. JSON columns hold scenario definitions, event
-payloads, trace stage data, evaluation scores and report summaries. Large
-audio artifacts are intentionally out of the database (the MVP stores
-transcripts, not audio blobs).
-
-## Hybrid infrastructure
-
-- **Default (zero-install)**: SQLite + in-process asyncio workers.
-- **Production path**: `docker compose --profile full up` brings up
-  PostgreSQL, Redis, backend, frontend and the demo agent. `DATABASE_URL`
-  switches the SQLAlchemy engine; `REDIS_URL` switches run dispatch to ARQ.
-
-## Deliberate design decisions
-
-- **Scripted-first scenarios** before real audio (per spec §3): text scenarios
-  run deterministically and offline; audio scenarios are declared in the
-  format but marked deferred until recorded/generated inputs land.
-- **LLM judge is pluggable**: any OpenAI-compatible endpoint works; when no
-  key is configured the platform degrades to transparent heuristics and labels
-  the report `judge_mode: heuristic` instead of pretending.
-- **Failure switches, not failure code**: the demo agent's bugs are config
-  (`failure_config.json`), so "break → fix → rerun → improve" is a config
-  change, showing score movement credibly.
+### 2.4 Auto-Doctor Patcher & Sandbox (`app/darwin/patcher.py`)
+- Rule-based regex classification + LLM reasoning for root cause analysis.
+- Generates unified git diffs targeting agent code switches.
+- Executes sandbox re-runs to verify that the generated patch resolves the vulnerability without regressing baseline turns.

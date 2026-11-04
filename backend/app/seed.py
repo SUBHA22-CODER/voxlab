@@ -50,7 +50,8 @@ async def load_builtin_scenarios(db: AsyncSession) -> int:
         return 0
 
     loaded = 0
-    for path in sorted(scenarios_dir.glob("*.json")):
+    all_json_files = list(scenarios_dir.glob("*.json")) + list(scenarios_dir.glob("regression/*.json"))
+    for path in sorted(all_json_files, key=lambda p: p.name):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError) as exc:
@@ -117,11 +118,39 @@ async def ensure_demo_agent(db: AsyncSession, user: User) -> Agent:
     return agent
 
 
+async def ensure_dictation_agent(db: AsyncSession, user: User) -> Agent:
+    dictation_name = "Wispr Flow Dictation Agent (Demo)"
+    dictation_endpoint = "http://localhost:8200/conversation"
+    agent = await db.scalar(
+        select(Agent).where(Agent.user_id == user.id, Agent.name == dictation_name)
+    )
+    if agent is None:
+        agent = Agent(
+            user_id=user.id,
+            name=dictation_name,
+            description=(
+                "Wispr Flow voice-to-text dictation agent with self-correction, "
+                "filler removal, and formatting switches (see agent-examples/dictation-agent/)."
+            ),
+            endpoint=dictation_endpoint,
+            agent_type="http",
+            stt_provider="browser",
+            llm_provider="openai-compatible",
+            tts_provider="browser",
+            config={"timeout_s": 30},
+        )
+        db.add(agent)
+        await db.commit()
+        logger.info("Registered Wispr Flow dictation agent at %s", dictation_endpoint)
+    return agent
+
+
 async def seed_all(with_run: bool = False) -> None:
     async with SessionLocal() as db:
         await load_builtin_scenarios(db)
         user = await ensure_demo_user(db)
         agent = await ensure_demo_agent(db, user)
+        await ensure_dictation_agent(db, user)
 
     if not with_run:
         return

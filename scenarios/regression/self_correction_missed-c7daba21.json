@@ -1,0 +1,39 @@
+{
+  "name": "Darwin Regression: self_correction_missed (c7daba21)",
+  "category": "regression",
+  "description": "Automated regression reproduction discovered by Darwin for persona 'self_corrector'. Diagnosis: Agent/pipeline output retained superseded phrase before self-correction.",
+  "steps": [
+    {
+      "type": "user_message",
+      "content": "Schedule a call for Tuesday, no wait, Wednesday at 2pm, actually let's make it Thursday at 4pm."
+    }
+  ],
+  "expected_behavior": "Agent must not exhibit self_correction_missed defect: Agent/pipeline output retained superseded phrase before self-correction..",
+  "latency_budget_ms": 6000,
+  "checks": [
+    {
+      "type": "reply_nonempty",
+      "turn": -1
+    }
+  ],
+  "metadata": {
+    "source": "darwin",
+    "run_id": 1,
+    "persona": "self_corrector",
+    "diagnosis": {
+      "category": "self_correction_missed",
+      "summary": "Agent/pipeline output retained superseded phrase before self-correction.",
+      "evidence_event_ids": [
+        "5",
+        "6"
+      ],
+      "confidence": 0.92,
+      "suggested_fix_area": "system_prompt_correction_filter",
+      "heuristic": true
+    },
+    "original_steps_count": 3,
+    "minimized_steps_count": 1,
+    "fitness": 0.408,
+    "created_at": "2026-11-04T16:59:20.056289+00:00"
+  }
+}

@@ -3,5 +3,8 @@
   "ignore_interruptions": true,
   "crash_on_tool_error": true,
   "forget_context": true,
-  "hinglish_support": false
+  "hinglish_support": false,
+  "skip_auth_for_managers": true,
+  "lose_order_after_long_turns": true,
+  "strict_language_lock": true
 }

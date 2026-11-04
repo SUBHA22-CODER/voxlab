@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
-    window.location.href = "/login";
+    window.location.href = "/register";
   }, []);
 
   const value = useMemo(

@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.api import (
     agents,
     auth,
+    darwin,
     playground,
     reports,
     scenarios,
@@ -60,6 +61,7 @@ def create_app() -> FastAPI:
         sessions.router,
         traces.router,
         reports.router,
+        darwin.router,
     ):
         app.include_router(router)
     app.include_router(playground.router)

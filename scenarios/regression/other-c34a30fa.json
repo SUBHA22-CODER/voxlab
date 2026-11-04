@@ -1,0 +1,43 @@
+{
+  "name": "Darwin Regression: other (c34a30fa)",
+  "category": "regression",
+  "description": "Automated regression reproduction discovered by Darwin for persona 'self_corrector'. Diagnosis: Deterministic failure triggered across checks: ['reply_not_contains']",
+  "steps": [
+    {
+      "type": "user_message",
+      "content": "I need to cancel order 4821, wait no, order 4822, actually keep 4822 and refund 9104."
+    },
+    {
+      "type": "user_message",
+      "content": "Please send the invoice to Priya, scratch that, send it to Pradeep Sharma at accounting."
+    }
+  ],
+  "expected_behavior": "Agent must not exhibit other defect: Deterministic failure triggered across checks: ['reply_not_contains'].",
+  "latency_budget_ms": 6000,
+  "checks": [
+    {
+      "type": "reply_nonempty",
+      "turn": -1
+    }
+  ],
+  "metadata": {
+    "source": "darwin",
+    "run_id": 7,
+    "persona": "self_corrector",
+    "diagnosis": {
+      "category": "other",
+      "summary": "Deterministic failure triggered across checks: ['reply_not_contains']",
+      "evidence_event_ids": [
+        "1",
+        "2",
+        "3"
+      ],
+      "confidence": 0.6,
+      "suggested_fix_area": "system_prompt"
+    },
+    "original_steps_count": 2,
+    "minimized_steps_count": 2,
+    "fitness": 0.5267,
+    "created_at": "2026-11-04T02:38:33.813422+00:00"
+  }
+}

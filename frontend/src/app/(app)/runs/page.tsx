@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CaretRight, Play } from "@phosphor-icons/react";
 import { Agents, Runs, Scenarios } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
@@ -18,6 +19,7 @@ import {
 import type { Scenario } from "@/lib/types";
 
 export default function RunsPage() {
+  const router = useRouter();
   const agents = useApi(Agents.list);
   const scenarios = useApi(Scenarios.list);
   const runs = useApi(Runs.list, { pollMs: 4000 });
@@ -205,12 +207,14 @@ export default function RunsPage() {
                 {(runs.data ?? []).map((run) => (
                   <tr
                     key={run.id}
-                    className="border-b border-zinc-800/40 transition-colors last:border-0 hover:bg-zinc-900/40"
+                    onClick={() => router.push(`/runs/${run.id}`)}
+                    className="group cursor-pointer border-b border-zinc-800/40 transition-colors last:border-0 hover:bg-zinc-800/40"
                   >
                     <td className="px-5 py-3">
                       <Link
                         href={`/runs/${run.id}`}
-                        className="font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-medium text-emerald-400 transition-colors group-hover:text-emerald-300"
                       >
                         Run #{run.id}
                       </Link>
@@ -239,8 +243,8 @@ export default function RunsPage() {
                         minute: "2-digit",
                       })}
                     </td>
-                    <td className="px-5 py-3 text-zinc-600">
-                      <CaretRight size={13} />
+                    <td className="px-5 py-3 text-zinc-600 transition-colors group-hover:text-emerald-400">
+                      <CaretRight size={13} className="transition-transform group-hover:translate-x-0.5" />
                     </td>
                   </tr>
                 ))}

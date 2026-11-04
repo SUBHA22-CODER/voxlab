@@ -1,0 +1,39 @@
+{
+  "name": "Darwin Regression: tool_error_unhandled (fc0e0ca2)",
+  "category": "regression",
+  "description": "Automated regression reproduction discovered by Darwin for persona 'filler_heavy_rambler'. Diagnosis: Internal API / tool error caused agent crash or unhandled 500 state.",
+  "steps": [
+    {
+      "type": "user_message",
+      "content": "Um, so like, basically, you know, I wanted to, uh, like check if my order, you know, like shipped?"
+    }
+  ],
+  "expected_behavior": "Agent must not exhibit tool_error_unhandled defect: Internal API / tool error caused agent crash or unhandled 500 state..",
+  "latency_budget_ms": 6000,
+  "checks": [
+    {
+      "type": "reply_nonempty",
+      "turn": -1
+    }
+  ],
+  "metadata": {
+    "source": "darwin",
+    "run_id": 64,
+    "persona": "filler_heavy_rambler",
+    "diagnosis": {
+      "category": "tool_error_unhandled",
+      "summary": "Internal API / tool error caused agent crash or unhandled 500 state.",
+      "evidence_event_ids": [
+        "3",
+        "6"
+      ],
+      "confidence": 0.88,
+      "suggested_fix_area": "tool_error_fallback_handling",
+      "heuristic": true
+    },
+    "original_steps_count": 2,
+    "minimized_steps_count": 1,
+    "fitness": 1.0,
+    "created_at": "2026-11-04T16:32:45.701670+00:00"
+  }
+}

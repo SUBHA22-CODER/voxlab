@@ -43,9 +43,12 @@ class ScenarioRunner:
     async def run(self) -> RunOutput:
         output = RunOutput()
         pending_inject: dict | None = None
+        scenario_meta = dict(self.definition.get("metadata") or {})
 
         for step in self.definition.get("steps", []):
             step_type = step.get("type", "user_message")
+            step_meta = dict(step.get("metadata") or {})
+            turn_base_meta = {**scenario_meta, **step_meta}
 
             if step_type == "tool_failure":
                 pending_inject = {"tool_failure": True}
@@ -62,9 +65,10 @@ class ScenarioRunner:
                     EVENT_INTERRUPTION,
                     {"content": step.get("content", "")},
                 )
+                turn_meta = _with_inject({**turn_base_meta, "interrupt": True}, pending_inject)
                 await self._execute_turn(
                     step.get("content", ""),
-                    _with_inject({"interrupt": True}, pending_inject),
+                    turn_meta,
                     output,
                     kind="interrupt",
                 )
@@ -73,15 +77,17 @@ class ScenarioRunner:
 
             if step_type == "silence":
                 self.collector.record(EVENT_SILENCE, {"note": "user went silent"})
+                turn_meta = _with_inject({**turn_base_meta, "signal": "silence"}, pending_inject)
                 await self._execute_turn(
-                    "", _with_inject({"signal": "silence"}, pending_inject), output, kind="silence"
+                    "", turn_meta, output, kind="silence"
                 )
                 pending_inject = None
                 continue
 
             # default: user_message
+            turn_meta = _with_inject(turn_base_meta, pending_inject)
             await self._execute_turn(
-                step.get("content", ""), _with_inject(None, pending_inject), output, kind="user_message"
+                step.get("content", ""), turn_meta, output, kind="user_message"
             )
             pending_inject = None
 

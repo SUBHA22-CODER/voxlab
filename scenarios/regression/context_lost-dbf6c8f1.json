@@ -1,0 +1,40 @@
+{
+  "name": "Darwin Regression: context_lost (dbf6c8f1)",
+  "category": "regression",
+  "description": "Automated regression reproduction discovered by Darwin for persona 'self_corrector'. Diagnosis: Agent forgot session context or entity ID after multiple dialogue turns.",
+  "steps": [
+    {
+      "type": "user_message",
+      "content": "Schedule a call for Tuesday, no wait, Wednesday at 2pm, actually let's make it Thursday at 4pm."
+    }
+  ],
+  "expected_behavior": "Agent must not exhibit context_lost defect: Agent forgot session context or entity ID after multiple dialogue turns..",
+  "latency_budget_ms": 6000,
+  "checks": [
+    {
+      "type": "reply_nonempty",
+      "turn": -1
+    }
+  ],
+  "metadata": {
+    "source": "darwin",
+    "run_id": 1,
+    "persona": "self_corrector",
+    "diagnosis": {
+      "category": "context_lost",
+      "summary": "Agent forgot session context or entity ID after multiple dialogue turns.",
+      "evidence_event_ids": [
+        "4",
+        "5",
+        "6"
+      ],
+      "confidence": 0.75,
+      "suggested_fix_area": "context_window_memory_buffer",
+      "heuristic": true
+    },
+    "original_steps_count": 3,
+    "minimized_steps_count": 1,
+    "fitness": 0.3647,
+    "created_at": "2026-11-04T15:33:52.773150+00:00"
+  }
+}

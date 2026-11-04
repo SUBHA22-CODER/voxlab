@@ -17,18 +17,25 @@ out/
 
 # Environment
 .env
-.env.local
-.env*.local
+.env.*
+*.env
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 
-# IDE / OS
+# IDE / OS / Agent Scratch
 .idea/
 .vscode/
+.zcode/
 .DS_Store
 Thumbs.db
 
 # Data
 *.sqlite3
 *.db
+*.db-shm
+*.db-wal
 data/
 
 # Build / misc

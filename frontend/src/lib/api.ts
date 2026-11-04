@@ -3,10 +3,13 @@
 import type {
   Agent,
   Comparison,
+  DarwinFinding,
+  DarwinPersona,
+  DarwinRun,
+  Report,
   RunDetail,
   Scenario,
   SessionDetailData,
-  Report,
   TestRun,
   User,
 } from "./types";
@@ -51,7 +54,7 @@ export async function api<T>(
   const response = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (response.status === 401 && typeof window !== "undefined") {
     setToken(null);
-    window.location.href = "/login";
+    window.location.href = "/register";
     throw new ApiError("Session expired", 401);
   }
   if (!response.ok) {
@@ -128,3 +131,36 @@ export const Reports = {
   forRun: (runId: number) => api<Report>(`/api/test-runs/${runId}/report`),
   compare: (a: number, b: number) => api<Comparison>(`/api/reports/${a}/compare/${b}`),
 };
+
+export const Darwin = {
+  personas: () => api<DarwinPersona[]>("/api/darwin/personas"),
+  listRuns: () => api<DarwinRun[]>("/api/darwin/runs"),
+  getRun: (id: number) => api<DarwinRun>(`/api/darwin/runs/${id}`),
+  createRun: (body: {
+    agent_id: number;
+    population_size?: number;
+    generations?: number;
+    top_k?: number;
+    personas?: string[];
+    seed?: number;
+    failure_threshold?: number;
+  }) => api<DarwinRun>("/api/darwin/runs", { method: "POST", body: JSON.stringify(body) }),
+  cancelRun: (id: number) => api<DarwinRun>(`/api/darwin/runs/${id}/cancel`, { method: "POST" }),
+  getFinding: (id: number) => api<DarwinFinding>(`/api/darwin/findings/${id}`),
+  exportFinding: (id: number) =>
+    api<{ status: string; file_name: string; scenario_id?: number; message: string }>(
+      `/api/darwin/findings/${id}/export`,
+      { method: "POST" },
+    ),
+  verifyPatch: (id: number) =>
+    api<{
+      status: string;
+      explanation: string;
+      diff: string;
+      before_score: number;
+      after_score: number;
+      score_delta: number;
+      verified: boolean;
+    }>(`/api/darwin/findings/${id}/verify-patch`, { method: "POST" }),
+};
+

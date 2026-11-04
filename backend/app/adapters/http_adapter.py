@@ -47,7 +47,7 @@ class HTTPAgentAdapter(VoiceAgentAdapter):
         self, message: str, metadata: dict | None = None
     ) -> AgentTurnResult:
         payload: dict[str, Any] = {
-            "session_id": self.agent_config["session_id"],
+            "session_id": self.agent_config.get("session_id", "vx-default-session"),
             "message": message,
             "metadata": metadata or {},
         }

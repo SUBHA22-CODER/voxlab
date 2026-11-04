@@ -1,0 +1,7 @@
+{
+  "_comment": "Managed via /admin/failure-config",
+  "ignore_self_corrections": true,
+  "strip_fillers": false,
+  "literal_period_handling": true,
+  "mangle_names": true
+}

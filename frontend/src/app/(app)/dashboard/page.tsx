@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
   Area,
@@ -28,6 +29,7 @@ import {
 import type { Report } from "@/lib/types";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const agents = useApi(Agents.list);
   const runs = useApi(Runs.list, { pollMs: 5000 });
 
@@ -255,12 +257,14 @@ export default function DashboardPage() {
                   return (
                     <tr
                       key={run.id}
-                      className="border-b border-zinc-800/40 transition-colors last:border-0 hover:bg-zinc-800/20"
+                      onClick={() => router.push(`/runs/${run.id}`)}
+                      className="group cursor-pointer border-b border-zinc-800/40 transition-colors last:border-0 hover:bg-zinc-800/40"
                     >
                       <td className="px-5 py-3">
                         <Link
                           href={`/runs/${run.id}`}
-                          className="font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+                          onClick={(e) => e.stopPropagation()}
+                          className="font-medium text-emerald-400 transition-colors group-hover:text-emerald-300"
                         >
                           Run #{run.id}
                         </Link>

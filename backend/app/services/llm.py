@@ -15,17 +15,26 @@ logger = logging.getLogger(__name__)
 
 
 class LLMService:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        model: str | None = None,
+    ) -> None:
         settings = get_settings()
-        self.model = settings.llm_model
+        self.model = model or settings.llm_model
         self._client = None
-        if settings.llm_api_key:
+        effective_key = api_key if api_key is not None else settings.llm_api_key
+        effective_base_url = base_url or settings.llm_base_url
+        if effective_key:
             try:
                 from openai import AsyncOpenAI
 
                 self._client = AsyncOpenAI(
-                    api_key=settings.llm_api_key,
-                    base_url=settings.llm_base_url,
+                    api_key=effective_key,
+                    base_url=effective_base_url,
+                    max_retries=1,
+                    timeout=10.0,
                 )
             except Exception as exc:  # noqa: BLE001
                 logger.warning("Failed to initialize LLM client: %s", exc)

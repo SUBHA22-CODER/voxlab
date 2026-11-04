@@ -195,3 +195,89 @@ export interface TraceData {
     illustrative?: boolean;
   };
 }
+
+// --- Darwin Types ---
+
+export interface DarwinPersona {
+  id: string;
+  name: string;
+  description: string;
+  is_dictation_focused: boolean;
+  strategies: string[];
+}
+
+export interface DarwinGeneration {
+  id: number;
+  generation_index: number;
+  best_fitness: number;
+  avg_fitness: number;
+  stats: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface DarwinFinding {
+  id: number;
+  run_id: number;
+  persona: string;
+  strategy: string;
+  genome: {
+    persona: string;
+    strategy: string;
+    steps: ScenarioStep[];
+  };
+  minimized_steps: ScenarioStep[];
+  original_steps_count: number;
+  minimized_steps_count: number;
+  fitness: number;
+  diagnosis: {
+    category: string;
+    summary: string;
+    evidence_event_ids?: string[];
+    confidence: number;
+    suggested_fix_area?: string;
+    heuristic?: boolean;
+  };
+  trace_id: string | null;
+  session_id: number | null;
+  exported_scenario_id: number | null;
+  patch_proposal: {
+    status: string;
+    explanation: string;
+    diff: string;
+    before_score: number;
+    after_score: number;
+    score_delta: number;
+    verified: boolean;
+  } | null;
+  created_at: string;
+}
+
+export interface DarwinRun {
+  id: number;
+  agent_id: number;
+  status: "queued" | "running" | "completed" | "failed" | "cancelled" | "partial";
+  config: {
+    population_size: number;
+    generations: number;
+    top_k: number;
+    personas: string[];
+    seed: number;
+    failure_threshold: number;
+  };
+  stats: {
+    current_generation: number;
+    total_generations: number;
+    sessions_executed: number;
+    best_fitness: number;
+    avg_fitness: number;
+    findings_count: number;
+    heuristic_mode?: boolean;
+  };
+  progress: number;
+  error: string | null;
+  started_at: string;
+  finished_at: string | null;
+  generations_data?: DarwinGeneration[];
+  findings?: DarwinFinding[];
+}
+
