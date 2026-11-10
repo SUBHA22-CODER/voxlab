@@ -289,3 +289,28 @@ async def test_benchmark_unknown_engine_rejected(client, auth_headers, monkeypat
         data={"engines": "nonexistent_engine"},
     )
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_transcribe_with_reference_returns_alignment_and_semantic(
+    client, auth_headers, monkeypatch
+):
+    """Phase 3+4 surfaces ride along on the transcribe response."""
+    await _patch_stub(monkeypatch)
+    response = await client.post(
+        "/api/v1/audio/transcribe",
+        headers=auth_headers,
+        files={"file": ("clip.wav", _wav_bytes(), "audio/wav")},
+        data={
+            "reference_transcript": "completely different reference words",
+            "entities": "kubernetes",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["alignment"] is not None
+    assert body["alignment"]["counts"]["substitutions"] >= 1
+    assert body["semantic"] is not None
+    assert "meaning_preserved" in body["semantic"]
+    # The advisory LLM layer is opt-in: absent unless explicitly requested.
+    assert body["llm_judgment"] is None

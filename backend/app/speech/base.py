@@ -63,6 +63,9 @@ class TranscriptionResult:
     duration_seconds: float = 0.0
     processing_time_seconds: float = 0.0
     metadata: dict[str, Any] = field(default_factory=dict)
+    # Engine-provided word timings (hypothesis-token aligned) when the engine
+    # supports them; empty when not. NEVER fabricated.
+    word_timings: list[WordTiming] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,6 +84,11 @@ class TranscriptionResult:
             "duration_seconds": self.duration_seconds,
             "processing_time_seconds": round(self.processing_time_seconds, 6),
             "metadata": self.metadata,
+            "word_timings": [
+                {"word_index": i, "start_seconds": w.start_seconds, "end_seconds": w.end_seconds,
+                 "confidence": w.confidence}
+                for i, w in enumerate(self.word_timings)
+            ],
         }
 
 

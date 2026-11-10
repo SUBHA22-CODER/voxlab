@@ -38,7 +38,11 @@ class TranscriptionOut(BaseModel):
     duration_seconds: float = 0.0
     processing_time_seconds: float = 0.0
     metadata: dict[str, Any] = Field(default_factory=dict)
+    word_timings: list[dict[str, Any]] = Field(default_factory=list)
     metrics: dict[str, Any] | None = None  # present when a reference was given
+    alignment: dict[str, Any] | None = None  # word-level localization (Phase 4)
+    semantic: dict[str, Any] | None = None  # deterministic semantic layer (Phase 3)
+    llm_judgment: dict[str, Any] | None = None  # labeled LLM layer (Phase 3, advisory)
 
 
 # --- darwin audio -----------------------------------------------------------------

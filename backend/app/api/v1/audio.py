@@ -12,7 +12,11 @@ from app.models import User
 from app.schemas.audio import EngineHealthOut, EngineOut, TranscriptionOut
 from app.speech.base import SpeechEngine
 from app.speech.exceptions import SpeechError
+from app.speech.alignment import WordTiming, align_words
 from app.speech.metrics import compute_transcript_metrics
+from app.speech.semantic import analyze_semantic_errors
+from app.speech.semantic_llm import judge_semantics_with_llm
+from app.services.llm import LLMService
 from app.speech.registry import engine_registry
 from app.speech.runtime import decode_upload_to_audio, get_engine, speech_error_to_http
 
@@ -49,6 +53,7 @@ async def transcribe_audio(
     reference_transcript: str | None = Form(default=None),
     entities: str | None = Form(default=None),  # comma-separated
     technical_vocab: str | None = Form(default=None),  # comma-separated
+    use_llm_judge: bool = Form(default=False),  # advisory LLM layer is opt-in
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -62,6 +67,9 @@ async def transcribe_audio(
     except SpeechError as exc:
         raise speech_error_to_http(exc) from exc
 
+    alignment_payload = None
+    semantic_payload = None
+    llm_payload = None
     metrics = None
     if reference_transcript:
         metrics = compute_transcript_metrics(
@@ -74,7 +82,43 @@ async def transcribe_audio(
             audio_duration_seconds=result.duration_seconds,
         ).to_dict()
 
+        # Word-level localization: engine word timings join the alignment only
+        # when the engine supplied them (never invented).
+        timings = (
+            [WordTiming(start_seconds=w.start_seconds, end_seconds=w.end_seconds, confidence=w.confidence)
+             for w in result.word_timings]
+            if result.word_timings
+            else None
+        )
+        alignment_payload = align_words(reference_transcript, result.text, timings).to_dict()
+
+        # Deterministic semantic layer (ground truth).
+        entity_list = [e.strip() for e in entities.split(",") if e.strip()] if entities else None
+        vocab_list = [v.strip() for v in technical_vocab.split(",") if v.strip()] if technical_vocab else None
+        semantic = analyze_semantic_errors(
+            reference_transcript, result.text, entities=entity_list, technical_vocab=vocab_list
+        )
+        semantic_payload = semantic.to_dict()
+
+        # LLM judgment layer (advisory, fully labeled). Opt-in: transcripts
+        # are only sent to the external LLM provider when the caller asks for
+        # it AND a key is configured (explicit configuration + consent).
+        if use_llm_judge:
+            llm = LLMService()
+            if llm.available:
+                judgment = await judge_semantics_with_llm(llm, reference_transcript, result.text)
+                llm_payload = judgment.to_dict()
+            else:
+                from app.speech.semantic_llm import LLMSemanticJudgment
+
+                llm_payload = LLMSemanticJudgment(
+                    available=False, provenance={"reason": "no_llm_key"}
+                ).to_dict()
+
     return TranscriptionOut(
         **result.to_dict(),
         metrics=metrics,
+        alignment=alignment_payload,
+        semantic=semantic_payload,
+        llm_judgment=llm_payload,
     )

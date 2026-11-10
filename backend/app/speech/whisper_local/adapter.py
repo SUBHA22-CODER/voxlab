@@ -32,6 +32,7 @@ from typing import Any
 
 import numpy as np
 
+from ..alignment import WordTiming
 from ..audio import TARGET_SAMPLE_RATE
 from ..base import (
     AudioData,
@@ -255,7 +256,13 @@ class WhisperLocalEngine(SpeechEngine):
                 f"whisper_local transcription failed: {exc}"
             ) from exc
 
-        text, lang, lang_prob, segments, engine_duration = payload
+        text, lang, lang_prob, segments, engine_duration, word_timings = payload
+        # Word timings are hypothesis-token aligned only when the count
+        # matches the transcript's tokens; otherwise they are dropped rather
+        # than misaligned (never fabricate).
+        hyp_tokens = text.split()
+        if len(word_timings) != len(hyp_tokens):
+            word_timings = []
         return TranscriptionResult(
             engine=self.engine_id(),
             text=text,
@@ -264,12 +271,14 @@ class WhisperLocalEngine(SpeechEngine):
             segments=segments,
             duration_seconds=engine_duration or audio.duration_seconds,
             processing_time_seconds=time.perf_counter() - started,
+            word_timings=word_timings,
             metadata={
                 "model": self.config.model_key,
                 "device": self.config.device,
                 "compute_type": self.config.compute_type,
                 "beam_size": self.config.beam_size,
                 "vad_filter": self.config.vad_filter,
+                "word_timestamps": self.config.word_timestamps and bool(word_timings),
             },
         )
 
@@ -278,7 +287,7 @@ class WhisperLocalEngine(SpeechEngine):
         samples: np.ndarray,
         sample_rate: int,
         language: str | None,
-    ) -> tuple[str, str | None, float | None, list[TranscriptionSegment], float]:
+    ) -> tuple[str, str | None, float | None, list[TranscriptionSegment], float, list[WordTiming]]:
         """Runs in a worker thread. Returns the standardized pieces."""
         if self._model is None:  # pragma: no cover - guarded by caller
             raise TranscriptionFailed("model went away mid-flight")
@@ -307,10 +316,12 @@ class WhisperLocalEngine(SpeechEngine):
             beam_size=self.config.beam_size,
             vad_filter=self.config.vad_filter,
             condition_on_previous_text=False,
+            word_timestamps=self.config.word_timestamps,
         )
 
         texts: list[str] = []
         segments: list[TranscriptionSegment] = []
+        words: list[WordTiming] = []
         for segment in segments_iter:
             texts.append(segment.text)
             segments.append(
@@ -320,12 +331,24 @@ class WhisperLocalEngine(SpeechEngine):
                     text=segment.text.strip(),
                 )
             )
+            if self.config.word_timestamps and getattr(segment, "words", None):
+                for word in segment.words:
+                    # faster-whisper word texts carry a leading space; the
+                    # probability is engine-provided (may be None).
+                    prob = getattr(word, "probability", None)
+                    words.append(
+                        WordTiming(
+                            start_seconds=float(word.start),
+                            end_seconds=float(word.end),
+                            confidence=float(prob) if prob is not None else None,
+                        )
+                    )
         text = "".join(texts).strip()
         lang = getattr(info, "language", None)
         lang_prob = getattr(info, "language_probability", None)
         engine_duration = getattr(info, "duration", None)
         self.last_error = None
-        return text, lang, lang_prob, segments, float(engine_duration or 0.0)
+        return text, lang, lang_prob, segments, float(engine_duration or 0.0), words
 
     # -- streaming (honest chunked-window) ------------------------------------
 

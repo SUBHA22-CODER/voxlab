@@ -47,6 +47,7 @@ class WhisperLocalConfig:
     language: str | None = None  # None = auto-detect per clip
     vad_filter: bool = True  # Silero VAD inside faster-whisper (skips silence)
     timeout_seconds: float = 120.0
+    word_timestamps: bool = False  # engine-provided per-word timings (Phase 4)
     cpu_threads: int = 0  # 0 = CTranslate2 default
     num_workers: int = 1
 
