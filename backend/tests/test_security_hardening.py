@@ -177,3 +177,29 @@ class TestAuditEndpoints:
         assert body["auth"]["demo_bypass_removed"] is True
         assert body["retention"]["audio_retention_days"] >= 0
         assert isinstance(body["engines"], list)
+
+
+@pytest.mark.asyncio
+class TestDemoUserSelfHealing:
+    async def test_legacy_demo_password_is_healed(self, db_session):
+        """A database that still carries a legacy demo hash (pre-2.0
+        'demo123') is healed to the documented credential at startup."""
+        from app.core.security import hash_password, verify_password
+        from app.models import User as UserRow
+        from app.seed import DEMO_EMAIL, DEMO_PASSWORD, ensure_demo_user
+
+        # Simulate the legacy state: wrong hash on the demo account.
+        user = await db_session.scalar(
+            select(UserRow).where(UserRow.email == DEMO_EMAIL)
+        )
+        if user is None:
+            user = UserRow(email=DEMO_EMAIL, password_hash=hash_password("legacy"))
+            db_session.add(user)
+        else:
+            user.password_hash = hash_password("legacy-password")
+        await db_session.commit()
+
+        healed = await ensure_demo_user(db_session)
+        assert verify_password(DEMO_PASSWORD, healed.password_hash), (
+            "ensure_demo_user must reset a non-canonical demo hash"
+        )

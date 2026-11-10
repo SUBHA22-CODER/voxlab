@@ -90,6 +90,17 @@ async def ensure_demo_user(db: AsyncSession) -> User:
         db.add(user)
         await db.commit()
         logger.info("Created demo user %s (password: %s)", DEMO_EMAIL, DEMO_PASSWORD)
+        return user
+    # VoxLab 2.5: the credential bypass is gone, so the stored hash must
+    # actually match the canonical demo password. Older databases may still
+    # carry a legacy hash (e.g. the pre-2.0 "demo123") — self-heal to the
+    # documented credential. Demo-account-only; user accounts are untouched.
+    from app.core.security import verify_password
+
+    if not verify_password(DEMO_PASSWORD, user.password_hash):
+        user.password_hash = hash_password(DEMO_PASSWORD)
+        await db.commit()
+        logger.info("Reset demo user %s password to the documented credential", DEMO_EMAIL)
     return user
 
 
