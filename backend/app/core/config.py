@@ -30,6 +30,17 @@ class Settings(BaseSettings):
     # scenario does not define one.
     default_latency_budget_ms: int = 5000
 
+    # --- Speech engine (VoxLab 2.0) -----------------------------------------
+    # Default faster-whisper model key (tiny/base/small/medium/large-v3/...en).
+    speech_whisper_model: str = "base"
+    speech_device: str = "cpu"  # "cpu" | "cuda" (cuda only when explicitly set)
+    speech_compute_type: str = "int8"
+    speech_timeout_seconds: float = 120.0
+    speech_max_upload_mb: int = 25
+    speech_max_duration_seconds: float = 600.0
+    # Where uploaded seed audio and candidate WAV artifacts are stored.
+    audio_storage_dir: str = "./data/audio"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

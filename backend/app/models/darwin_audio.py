@@ -77,3 +77,45 @@ class AudioFinding(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     run: Mapped[DarwinAudioRun] = relationship(back_populates="findings")
+
+
+class AudioRegressionCase(Base):
+    """Persistent regression corpus entry for audio transcription failures."""
+
+    __tablename__ = "audio_regression_cases"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    test_id: Mapped[str] = mapped_column(String(24), unique=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    engine: Mapped[str] = mapped_column(String(64), index=True)
+    model_version: Mapped[str] = mapped_column(String(128), default="")
+    language: Mapped[str] = mapped_column(String(16), default="en")
+    severity: Mapped[str] = mapped_column(String(16), default="medium")  # low|medium|high|critical
+    failure_category: Mapped[str] = mapped_column(String(64), default="other")
+    seed_audio_ref: Mapped[str] = mapped_column(String(512), default="")
+    chain: Mapped[list] = mapped_column(JSON, default=list)  # transform chain to replay
+    seed: Mapped[int] = mapped_column(Integer, default=0)
+    reference_transcript: Mapped[str] = mapped_column(Text, default="")
+    expected_behavior: Mapped[str] = mapped_column(Text, default="")
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    tags: Mapped[list] = mapped_column(JSON, default=list)
+    last_run: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # last replay result: wer/cer/status ("still_failing"|"fixed"), timestamp
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class AudioBenchmark(Base):
+    """Multi-engine benchmark result for one audio clip."""
+
+    __tablename__ = "audio_benchmarks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    label: Mapped[str] = mapped_column(String(255), default="")
+    engine_results: Mapped[list] = mapped_column(JSON, default=list)
+    # per engine: {engine, model, text, wer, cer, processing_time_seconds,
+    #              realtime_factor, language, status, error}
+    audio_duration_seconds: Mapped[float] = mapped_column(Float, default=0.0)
+    reference_transcript: Mapped[str] = mapped_column(Text, default="")
+    audio_ref: Mapped[str] = mapped_column(String(512), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

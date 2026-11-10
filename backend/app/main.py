@@ -67,6 +67,11 @@ def create_app() -> FastAPI:
         app.include_router(router)
     app.include_router(playground.router)
 
+    # VoxLab 2.0 versioned APIs (audio, darwin audio, regressions, benchmarks)
+    from app.api.v1 import api_v1_router
+
+    app.include_router(api_v1_router)
+
     @app.exception_handler(Exception)
     async def unhandled_error_handler(request: Request, exc: Exception) -> JSONResponse:
         # Log full context server-side; return a generic message to clients.

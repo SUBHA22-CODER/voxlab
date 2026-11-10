@@ -65,7 +65,9 @@ class EngineRegistry:
             if installed:
                 # Deliberately do NOT instantiate here (model load is expensive);
                 # describe from class-level metadata only.
-                entry["capabilities"] = cls.describe_capabilities()
+                from dataclasses import asdict
+
+                entry["capabilities"] = asdict(cls.describe_capabilities())
                 entry["attribution"] = getattr(cls, "ATTRIBUTION", None)
             else:
                 entry["install_hint"] = self.install_hint(engine_id)
