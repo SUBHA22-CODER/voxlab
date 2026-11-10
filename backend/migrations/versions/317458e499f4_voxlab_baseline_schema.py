@@ -1,7 +1,7 @@
 """voxlab baseline schema
 
 Revision ID: 317458e499f4
-Revises: 
+Revises:
 Create Date: 2026-11-11 01:54:40.818578
 
 """
