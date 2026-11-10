@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     speech_max_duration_seconds: float = 600.0
     # Where uploaded seed audio and candidate WAV artifacts are stored.
     audio_storage_dir: str = "./data/audio"
+    # Audio artifact retention in days; 0 keeps artifacts forever. The sweep
+    # deletes run-scoped directories whose last modification is older than
+    # the cutoff (privacy: recordings must not linger indefinitely).
+    audio_retention_days: int = 30
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

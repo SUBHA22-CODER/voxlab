@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -19,7 +20,7 @@ from app.api import (
 from app.core.config import get_settings
 from app.core.database import SessionLocal, dispose_engine, init_db
 from app.core.rate_limit import auth_rate_limit_middleware
-from app.seed import load_builtin_scenarios
+from app.seed import ensure_demo_user, load_builtin_scenarios
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,12 +31,25 @@ logger = logging.getLogger("voxlab")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Dev/demo convenience: create tables on startup. Use Alembic for strict
-    # production schema management.
+    settings = get_settings()
+    # Dev/demo convenience: create tables on startup. Alembic migrations are
+    # available for strict production schema management (VoxLab 2.5).
     await init_db()
     async with SessionLocal() as db:
         loaded = await load_builtin_scenarios(db)
+        await ensure_demo_user(db)
     logger.info("Builtin scenarios loaded: %d", loaded)
+
+    # Audio retention sweep (VoxLab 2.5): recordings are sensitive and must
+    # not linger past the configured window. Runs in a worker thread — the
+    # directory scan must not delay startup.
+    from app.services.retention import sweep_old_artifacts
+
+    retention_stats = await asyncio.to_thread(
+        sweep_old_artifacts, settings.audio_storage_dir, settings.audio_retention_days
+    )
+    if retention_stats["deleted"]:
+        logger.info("Audio retention sweep: %s", retention_stats)
     yield
     await dispose_engine()
 

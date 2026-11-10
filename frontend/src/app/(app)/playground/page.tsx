@@ -60,7 +60,9 @@ export default function PlaygroundPage() {
     setEvents([]);
     setNotice(null);
 
-    const ws = new WebSocket(wsUrl(`/ws/playground/${effectiveAgentId}?token=${token}`));
+    // Token via Sec-WebSocket-Protocol ('bearer', token): never in the URL,
+    // so credentials stay out of access logs (VoxLab 2.5).
+    const ws = new WebSocket(wsUrl(`/ws/playground/${effectiveAgentId}`), ["bearer", token]);
     wsRef.current = ws;
 
     ws.onopen = () => setConnected(true);

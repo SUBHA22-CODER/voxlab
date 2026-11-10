@@ -80,6 +80,7 @@ export function wsUrl(path: string): string {
 // --- Typed endpoints ---
 
 export const Auth = {
+  logout: () => api<{ status: string }>("/api/auth/logout", { method: "POST" }),
   login: (email: string, password: string) =>
     api<{ access_token: string }>("/api/auth/login", {
       method: "POST",

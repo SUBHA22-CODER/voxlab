@@ -36,13 +36,15 @@ def verify_password(password: str, stored: str) -> bool:
 
 # --- JWT ---
 
-def create_access_token(subject: str) -> str:
+def create_access_token(subject: str) -> tuple[str, str]:
+    """Create a JWT. Returns (token, jti); the jti enables revocation."""
     settings = get_settings()
     expire = datetime.now(UTC) + timedelta(
         minutes=settings.access_token_expire_minutes
     )
-    payload = {"sub": subject, "exp": expire}
-    return jwt.encode(payload, settings.secret_key, algorithm="HS256")
+    jti = os.urandom(16).hex()
+    payload = {"sub": subject, "exp": expire, "jti": jti}
+    return jwt.encode(payload, settings.secret_key, algorithm="HS256"), jti
 
 
 def decode_access_token(token: str) -> str | None:
@@ -51,6 +53,15 @@ def decode_access_token(token: str) -> str | None:
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=["HS256"])
         return payload.get("sub")
+    except jwt.PyJWTError:
+        return None
+
+
+def decode_access_token_full(token: str) -> dict | None:
+    """Return the full payload or None if invalid/expired."""
+    settings = get_settings()
+    try:
+        return jwt.decode(token, settings.secret_key, algorithms=["HS256"])
     except jwt.PyJWTError:
         return None
 

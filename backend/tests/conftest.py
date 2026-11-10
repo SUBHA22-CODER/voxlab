@@ -19,11 +19,11 @@ def _relax_rate_limit():
     """Tests share one client IP; disable the auth rate limit per test."""
     from app.core import rate_limit
 
-    original = rate_limit.MAX_REQUESTS
-    rate_limit.MAX_REQUESTS = 1_000_000
+    original = rate_limit.TEST_OVERRIDE_LIMIT
+    rate_limit.TEST_OVERRIDE_LIMIT = 1_000_000
     rate_limit._hits.clear()
     yield
-    rate_limit.MAX_REQUESTS = original
+    rate_limit.TEST_OVERRIDE_LIMIT = original
     rate_limit._hits.clear()
 
 

@@ -66,8 +66,14 @@ class TestPlaygroundWebSocket:
         monkeypatch.setattr("app.main.init_db", _noop)
         monkeypatch.setattr("app.main.load_builtin_scenarios", _noop)
         with TestClient(app) as tc:
+            # VoxLab 2.5: token must arrive via Sec-WebSocket-Protocol; a
+            # malformed subprotocol list is rejected (and never appears in
+            # the URL, which previously leaked tokens into access logs).
             with pytest.raises(Exception):  # noqa: B017 - asserts any transport failure
-                with tc.websocket_connect(f"/ws/playground/{agent.id}?token=bad"):
+                with tc.websocket_connect(
+                    f"/ws/playground/{agent.id}",
+                    subprotocols=["bearer", "not-a-real-token"],
+                ):
                     tc.receive_json()  # pragma: no cover
 
 

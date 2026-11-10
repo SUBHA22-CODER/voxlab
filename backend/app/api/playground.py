@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.adapters.base import build_adapter
 from app.core.database import SessionLocal
@@ -48,10 +48,29 @@ def _serialize_event(event: dict) -> dict:
     }
 
 
+def _token_from_subprotocol(header_value: str | None) -> str | None:
+    """Extract the bearer token from Sec-WebSocket-Protocol.
+
+    The client offers ['bearer', <token>]; we select 'bearer' when accepting.
+    The raw token is never echoed back to the client.
+    """
+    if not header_value:
+        return None
+    parts = [p.strip() for p in header_value.split(",")]
+    if len(parts) >= 2 and parts[0].lower() == "bearer" and parts[1]:
+        return parts[1]
+    return None
+
+
 @router.websocket("/ws/playground/{agent_id}")
-async def playground_socket(
-    websocket: WebSocket, agent_id: int, token: str = Query("")
-):
+async def playground_socket(websocket: WebSocket, agent_id: int):
+    # Token arrives via the Sec-WebSocket-Protocol header
+    # ("bearer,<token>") — browsers cannot set arbitrary WS headers, and the
+    # previous ?token= query string leaked credentials into access logs.
+    token = _token_from_subprotocol(websocket.headers.get("sec-websocket-protocol"))
+    if token is None:
+        await websocket.close(code=4401, reason="Missing token")
+        return
     user_id = decode_access_token(token)
     if user_id is None:
         await websocket.close(code=4401, reason="Invalid token")
@@ -91,14 +110,14 @@ async def playground_socket(
         try:
             await adapter.connect()
         except Exception as exc:
-            await websocket.accept()
+            await websocket.accept(subprotocol="bearer")
             await websocket.send_json(
                 {"type": "error", "message": f"Cannot reach agent: {exc}"[:300]}
             )
             await websocket.close(code=1011)
             return
 
-        await websocket.accept()
+        await websocket.accept(subprotocol="bearer")
         await websocket.send_json(
             {
                 "type": "session_started",

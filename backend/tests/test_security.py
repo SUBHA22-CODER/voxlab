@@ -30,14 +30,14 @@ class TestPasswords:
 
 class TestTokens:
     def test_token_roundtrip(self):
-        token = create_access_token("42")
+        token, _jti = create_access_token("42")
         assert decode_access_token(token) == "42"
 
     def test_garbage_token_is_rejected(self):
         assert decode_access_token("not.a.jwt") is None
 
     def test_tampered_token_is_rejected(self):
-        token = create_access_token("42")
+        token, _jti = create_access_token("42")
         assert decode_access_token(token + "x") is None
 
 

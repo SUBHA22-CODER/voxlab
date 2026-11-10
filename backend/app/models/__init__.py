@@ -158,3 +158,11 @@ from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun  # noqa
 
 # Darwin audio evolution models (VoxLab 2.0)
 from app.models.darwin_audio import AudioFinding, DarwinAudioGeneration, DarwinAudioRun  # noqa: E402
+
+
+# Security models (VoxLab 2.5)
+from app.models.security_models import AuditEvent, RevokedToken  # noqa: E402
+
+
+# Security models (VoxLab 2.5)
+from app.models.security_models import AuditEvent, RevokedToken  # noqa: E402

@@ -8,10 +8,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import SessionLocal
-from app.core.security import decode_access_token
 from app.darwin.evolution import EvolutionEngine
 from app.engine.orchestrator import Orchestrator
 from app.models import Agent, User
+from app.models.security_models import RevokedToken
 
 bearer = HTTPBearer(auto_error=False)
 
@@ -35,10 +35,21 @@ async def get_current_user(
 ) -> User:
     if credentials is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
-    subject = decode_access_token(credentials.credentials)
-    if subject is None:
+    from app.core.security import decode_access_token_full
+
+    payload = decode_access_token_full(credentials.credentials)
+    if payload is None or payload.get("sub") is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
-    user = await db.scalar(select(User).where(User.id == int(subject)))
+    # Revocation check: a logged-out (or otherwise revoked) jti is rejected
+    # even while the JWT itself is still unexpired.
+    jti = payload.get("jti")
+    if jti is not None:
+        revoked = await db.scalar(
+            select(RevokedToken.jti).where(RevokedToken.jti == str(jti))
+        )
+        if revoked is not None:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token revoked")
+    user = await db.scalar(select(User).where(User.id == int(payload["sub"])))
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
     return user

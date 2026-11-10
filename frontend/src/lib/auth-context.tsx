@@ -50,6 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    // Revoke the token server-side (best-effort), then clear local state.
+    Auth.logout().catch(() => undefined);
     setToken(null);
     setUser(null);
     window.location.href = "/register";
