@@ -165,3 +165,6 @@ from app.models.security_models import AuditEvent, RevokedToken  # noqa: E402
 
 
 # Security models (VoxLab 2.5)
+
+# Analytics models (VoxLab 2.5)
+from app.models.analytics_models import AudioDriftSnapshot  # noqa: E402
