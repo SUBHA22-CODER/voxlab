@@ -1,0 +1,11 @@
+# Optional speech-recognition stack for VoxLab 2.0 (VoxLab AI Reliability Lab).
+# The platform runs fully without this file (engines are reported as not
+# installed); install it to enable real transcription:
+#   pip install -r requirements-speech.txt
+#
+# Speech engine adapted from whisper-local (MIT):
+# https://github.com/drajb/whisper-local
+
+faster-whisper>=1.2.1
+numpy>=1.24.0
+soxr>=0.3.0
