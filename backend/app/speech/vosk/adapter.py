@@ -335,9 +335,8 @@ class VoskEngine(SpeechEngine):
         recognizer.SetWords(self.words_with_timestamps)
         pcm = _pcm16_bytes(audio.samples)
         chunk_bytes = max(2, int(chunk_seconds * self.sample_rate) * 2)
-        chunk_index = 0
         position_samples = 0
-        for offset in range(0, len(pcm), chunk_bytes):
+        for chunk_index, offset in enumerate(range(0, len(pcm), chunk_bytes)):
             piece = pcm[offset : offset + chunk_bytes]
             final_of_window = offset + chunk_bytes >= len(pcm)
             if recognizer.AcceptWaveform(piece):
@@ -354,4 +353,3 @@ class VoskEngine(SpeechEngine):
                 start_seconds=(position_samples - len(piece) // 2) / self.sample_rate,
                 end_seconds=position_samples / self.sample_rate,
             )
-            chunk_index += 1
