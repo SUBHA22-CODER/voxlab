@@ -17,9 +17,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:  # pragma: no cover - avoids an import cycle, type-only use
+    from .alignment import WordTiming
 
 # --- audio container passed to engines ---------------------------------------
 

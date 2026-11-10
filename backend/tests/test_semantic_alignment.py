@@ -68,7 +68,7 @@ def test_alignment_counts_match_metrics_wer():
 
     ref, hyp = "the quick brown fox", "the fast brown dog jumps"
     result = align_words(ref, hyp)
-    wer, detail = word_error_rate(ref, hyp)
+    _wer, detail = word_error_rate(ref, hyp)
     assert result.substitutions == detail["substitutions"]
     assert result.insertions == detail["insertions"]
     assert result.deletions == detail["deletions"]

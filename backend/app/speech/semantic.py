@@ -287,11 +287,10 @@ def _is_meaning_changing(ref_norm: str, hyp_norm: str) -> bool:
     if ref_norm == hyp_norm:
         return False
     variant = MORPH_VARIANTS.get(ref_norm)
-    if variant and (hyp_norm == variant or hyp_norm == ref_norm + "s"):
-        return False
-    if ref_norm.rstrip("s") == hyp_norm.rstrip("s"):
-        return False  # plural/singular
-    return True
+    is_morphology = (
+        bool(variant) and (hyp_norm == variant or hyp_norm == ref_norm + "s")
+    ) or ref_norm.rstrip("s") == hyp_norm.rstrip("s")
+    return not is_morphology
 
 
 def _is_number_confusion(ref_norm: str, hyp_norm: str) -> bool:
