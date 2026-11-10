@@ -85,6 +85,12 @@ def build_default_registry() -> EngineRegistry:
         registry.register(WhisperLocalEngine)
     except Exception as exc:  # noqa: BLE001 - defensive, contained
         logger.warning("whisper_local adapter could not be registered: %s", exc)
+    try:
+        from .vosk.adapter import VoskEngine
+
+        registry.register(VoskEngine)
+    except Exception as exc:  # noqa: BLE001 - defensive, contained
+        logger.warning("vosk adapter could not be registered: %s", exc)
     return registry
 
 

@@ -42,3 +42,8 @@ data/
 dist/
 build/
 *.log
+
+# local speech models (large, per-machine)
+backend/data/models/
+data/models/
+

@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     # deletes run-scoped directories whose last modification is older than
     # the cutoff (privacy: recordings must not linger indefinitely).
     audio_retention_days: int = 30
+    # Second engine (Vosk): explicit model dir or opt-in auto-download of the
+    # ~40 MB small English model. Default off — no surprise downloads.
+    speech_vosk_model_dir: str = ""
+    speech_vosk_auto_download: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -1,0 +1,9 @@
+# Optional second speech engine for VoxLab 2.5: Vosk (Kaldi-based, CPU,
+# genuinely streaming-capable, fully offline once the model is present).
+#   pip install -r requirements-speech-vosk.txt
+# Model: vosk-model-small-en-us-0.15 (~40 MB) from alphacephei.com — either
+# set SPEECH_VOSK_MODEL_DIR to an extracted model directory, or enable
+# SPEECH_VOSK_AUTO_DOWNLOAD=true to fetch it into AUDIO_STORAGE_DIR/models.
+
+vosk>=1.1.3
+httpx>=0.27
