@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Type
 
 from .base import SpeechEngine
 from .exceptions import EngineNotInstalled
@@ -18,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 class EngineRegistry:
     def __init__(self) -> None:
-        self._engine_classes: dict[str, Type[SpeechEngine]] = {}
+        self._engine_classes: dict[str, type[SpeechEngine]] = {}
         self._instances: dict[str, SpeechEngine] = {}
 
-    def register(self, engine_class: Type[SpeechEngine]) -> None:
+    def register(self, engine_class: type[SpeechEngine]) -> None:
         engine_id = engine_class.engine_id()
         self._engine_classes[engine_id] = engine_class
         logger.debug("Registered speech engine: %s", engine_id)
@@ -82,7 +81,7 @@ def build_default_registry() -> EngineRegistry:
         from .whisper_local.adapter import WhisperLocalEngine
 
         registry.register(WhisperLocalEngine)
-    except Exception as exc:  # pragma: no cover - defensive
+    except Exception as exc:  # noqa: BLE001 - pragma: no cover (defensive)
         logger.warning("whisper_local adapter could not be registered: %s", exc)
     return registry
 

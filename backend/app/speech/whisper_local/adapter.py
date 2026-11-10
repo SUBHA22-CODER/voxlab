@@ -27,7 +27,8 @@ import asyncio
 import gc
 import logging
 import time
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 import numpy as np
 
@@ -188,7 +189,7 @@ class WhisperLocalEngine(SpeechEngine):
             )
             for _segment in segments:
                 pass
-        except Exception as exc:  # warmup is best-effort, never fatal
+        except Exception as exc:  # noqa: BLE001 - warmup is best-effort, never fatal
             logger.debug("whisper_local warmup skipped: %s", exc)
 
     async def health_check(self) -> EngineHealth:
@@ -243,7 +244,7 @@ class WhisperLocalEngine(SpeechEngine):
                 ),
                 timeout=self.config.timeout_seconds,
             )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             raise EngineTimeout(
                 f"whisper_local transcription exceeded "
                 f"{self.config.timeout_seconds:.0f}s."
@@ -286,8 +287,7 @@ class WhisperLocalEngine(SpeechEngine):
             # The engine contract is 16 kHz; AudioData built outside the audio
             # pipeline may still carry another rate. faster-whisper accepts the
             # array as-is and assumes 16 kHz, so resampling is required.
-            from ..audio import resample_to_target
-            from ..audio import LoadedAudio
+            from ..audio import LoadedAudio, resample_to_target
 
             audio = resample_to_target(
                 LoadedAudio(

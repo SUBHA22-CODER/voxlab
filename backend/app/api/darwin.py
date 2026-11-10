@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import evolution_engine, get_current_user, get_db
+from app.core.limits import clamp_generations
 from app.darwin.patcher import Patcher
 from app.darwin.personas import get_active_personas
 from app.darwin.regression import export_finding_to_regression
@@ -64,11 +65,9 @@ async def create_darwin_run(
     if not personas_to_use:
         personas_to_use = active_p_ids
 
-    # Enforce hard budget cap: pop_size * generations <= 60
-    max_budget = 60
-    effective_generations = body.generations
-    if body.population_size * body.generations > max_budget:
-        effective_generations = max(1, max_budget // body.population_size)
+    # Enforce hard budget cap: pop_size * generations <= 60 (single source:
+    # app.core.limits)
+    effective_generations = clamp_generations(body.population_size, body.generations)
 
     run = DarwinRun(
         user_id=user.id,

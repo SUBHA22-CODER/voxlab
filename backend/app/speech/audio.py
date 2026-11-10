@@ -344,5 +344,5 @@ def wav_header_summary(blob: bytes) -> dict[str, Any]:  # pragma: no cover
                 "sample_width_bytes": wav.getsampwidth(),
                 "frames": wav.getnframes(),
             }
-    except Exception:
+    except Exception:  # noqa: BLE001 - diagnostics helper never raises
         return {"struct_probe": struct.unpack("<4s", blob[:4])[0].decode("ascii", "replace") if len(blob) >= 4 else None}

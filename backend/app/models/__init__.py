@@ -154,3 +154,7 @@ class Report(Base):
 # Darwin fuzzing & evolution models
 from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun  # noqa: E402
 
+
+
+# Darwin audio evolution models (VoxLab 2.0)
+from app.models.darwin_audio import AudioFinding, DarwinAudioGeneration, DarwinAudioRun  # noqa: E402

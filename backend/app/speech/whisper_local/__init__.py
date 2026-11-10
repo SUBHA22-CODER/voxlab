@@ -7,8 +7,8 @@ from .config import MODEL_SIZE_HINTS, WhisperLocalConfig, model_size_hint
 
 __all__ = [
     "ATTRIBUTION",
-    "WhisperLocalEngine",
-    "WhisperLocalConfig",
     "MODEL_SIZE_HINTS",
+    "WhisperLocalConfig",
+    "WhisperLocalEngine",
     "model_size_hint",
 ]

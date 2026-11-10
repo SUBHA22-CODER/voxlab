@@ -22,10 +22,11 @@
 
 from __future__ import annotations
 
+import math
 import re
 import unicodedata
-from dataclasses import dataclass, field
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 
 # --- normalization --------------------------------------------------------------
 
@@ -96,13 +97,13 @@ def _expand_contractions(text: str) -> str:
     return re.sub(r"\b[\w']+\b", _sub, text)
 
 
-def number_to_words(number: float | int) -> str:
+def number_to_words(number: float) -> str:
     """English words for a number ("25" -> "twenty five").
 
     Supports integers up to 999,999,999 and one decimal place ("2.5" ->
     "two point five"). Deterministic and dependency-free.
     """
-    if number != number or number in (float("inf"), float("-inf")):  # NaN/inf
+    if math.isnan(number) or number in (float("inf"), float("-inf")):  # NaN/inf
         raise ValueError("cannot spell non-finite number")
 
     negative = number < 0
@@ -314,8 +315,7 @@ def token_accuracy(reference: str, hypothesis: str, tokens: Iterable[str]) -> fl
 
 
 STOP_WORDS = frozenset(
-    "a an and are as at be but by for from has have i in is it its of on or "
-    "that the this to was were will with you your".split()
+    ["a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from", "has", "have", "i", "in", "is", "it", "its", "of", "on", "or", "that", "the", "this", "to", "was", "were", "will", "with", "you", "your"]
 )
 
 

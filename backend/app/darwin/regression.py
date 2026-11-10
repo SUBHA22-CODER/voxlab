@@ -33,16 +33,22 @@ def compute_regression_hash(category: str, steps: list[dict[str, Any]]) -> str:
 async def export_finding_to_regression(
     finding: DarwinFinding,
     db: AsyncSession | None = None,
+    output_dir: Path | None = None,
 ) -> tuple[Path, int | None]:
     """
     Exports a Darwin finding to scenarios/regression/<category>-<hash>.json
     and registers it in the Scenario table.
-    """
-    scenarios_dir = find_scenarios_dir()
-    if scenarios_dir is None:
-        raise RuntimeError("Scenarios directory could not be located")
 
-    regression_dir = scenarios_dir / "regression"
+    output_dir: test override — writing into the real scenarios tree from a
+    test would corrupt tracked regression fixtures.
+    """
+    if output_dir is not None:
+        regression_dir = Path(output_dir)
+    else:
+        scenarios_dir = find_scenarios_dir()
+        if scenarios_dir is None:
+            raise RuntimeError("Scenarios directory could not be located")
+        regression_dir = scenarios_dir / "regression"
     regression_dir.mkdir(parents=True, exist_ok=True)
 
     diag = finding.diagnosis or {}

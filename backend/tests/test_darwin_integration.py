@@ -16,7 +16,7 @@ from tests.scripted_agent import ScriptedAgentAdapter
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_darwin_evolution_integration_run(db_session: AsyncSession, monkeypatch):
+async def test_darwin_evolution_integration_run(db_session: AsyncSession, tmp_path, monkeypatch):
     # Setup test user and test agent
     user = User(email="darwin_tester@voxlab.dev", password_hash="testpass")
     db_session.add(user)
@@ -95,7 +95,7 @@ async def test_darwin_evolution_integration_run(db_session: AsyncSession, monkey
     assert len(f.minimized_steps) <= f.original_steps_count
     assert "category" in f.diagnosis
 
-    # Test regression export
-    path, scen_id = await export_finding_to_regression(f, db_session)
+    # Test regression export (tmp_path: never write into tracked scenarios/)
+    path, scen_id = await export_finding_to_regression(f, db_session, output_dir=tmp_path)
     assert path.exists()
     assert scen_id is not None

@@ -40,3 +40,7 @@ class EngineTimeout(SpeechError):
 
 class TranscriptionFailed(SpeechError):
     """The engine ran but produced a hard failure (not merely empty text)."""
+
+
+class TransformError(SpeechError):
+    """An audio transform received invalid parameters or an unknown operator."""

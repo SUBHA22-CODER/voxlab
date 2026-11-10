@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import copy
 import logging
-import os
 import random
 import uuid
 from typing import Any
@@ -15,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.adapters.base import build_adapter
 from app.core.config import get_settings
+from app.core.limits import max_darwin_sessions
 from app.core.security import decrypt_credentials
 from app.darwin.attacker import Attacker
 from app.darwin.diagnoser import Diagnoser
@@ -39,8 +39,6 @@ from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun
 from app.services.llm import LLMService
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_MAX_SESSIONS = 60
 
 
 class EvolutionEngine:
@@ -86,8 +84,7 @@ class EvolutionEngine:
 
     async def _run_evolution_loop(self, darwin_run_id: int) -> None:
         settings = get_settings()
-        env_budget = os.environ.get("DARWIN_MAX_SESSIONS")
-        max_budget = int(env_budget) if env_budget else DEFAULT_MAX_SESSIONS
+        max_budget = max_darwin_sessions()
 
         async with self.session_factory() as db:
             run = await db.get(DarwinRun, darwin_run_id)
