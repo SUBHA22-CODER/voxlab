@@ -165,4 +165,3 @@ from app.models.security_models import AuditEvent, RevokedToken  # noqa: E402
 
 
 # Security models (VoxLab 2.5)
-from app.models.security_models import AuditEvent, RevokedToken  # noqa: E402

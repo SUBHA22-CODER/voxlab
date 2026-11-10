@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
@@ -10,7 +10,7 @@ from app.core.security import (
     verify_password,
 )
 from app.models import Agent, User
-from app.models.security_models import AuditEvent, RevokedToken
+from app.models.security_models import RevokedToken
 from app.schemas import LoginRequest, RegisterRequest, TokenResponse, UserOut
 from app.services.audit import record_event
 
