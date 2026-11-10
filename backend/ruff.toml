@@ -47,3 +47,4 @@ ignore = [
 "app/engine/orchestrator.py" = ["BLE001"] # legacy guarded task cleanup
 "app/services/llm.py" = ["BLE001"] # legacy guarded client fallbacks
 "app/workers/runner.py" = ["BLE001"] # legacy guarded queue dispatch
+"migrations/*" = ["E402"] # env.py imports app models after alembic context setup, by design
