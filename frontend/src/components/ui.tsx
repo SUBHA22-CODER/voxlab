@@ -87,10 +87,19 @@ export function Card({
   );
 }
 
-export function CardHeader({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function CardHeader({
+  children,
+  className = "",
+  right,
+}: {
+  children: ReactNode;
+  className?: string;
+  right?: ReactNode;
+}) {
   return (
-    <div className={`border-b border-zinc-800/60 px-5 py-3.5 text-sm font-medium text-zinc-200 ${className}`}>
+    <div className={`flex items-center justify-between gap-3 border-b border-zinc-800/60 px-5 py-3.5 text-sm font-medium text-zinc-200 ${className}`}>
       {children}
+      {right}
     </div>
   );
 }

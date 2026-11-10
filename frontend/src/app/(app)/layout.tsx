@@ -5,12 +5,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   ChartBar,
+  ChartLine,
   Dna,
+  Flask,
   Lightning,
   Microphone,
   Robot,
   SignOut,
   SquaresFour,
+  Waveform,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth-context";
 import { Skeleton } from "@/components/ui";
@@ -19,10 +22,14 @@ import { BrandMark } from "@/components/brand";
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: SquaresFour },
   { href: "/playground", label: "Playground", icon: Microphone },
+  { href: "/audio", label: "Audio Lab", icon: Waveform },
+  { href: "/benchmarks", label: "Benchmarks", icon: ChartLine },
   { href: "/agents", label: "Agents", icon: Robot },
   { href: "/scenarios", label: "Scenarios", icon: Lightning },
   { href: "/runs", label: "Test Runs", icon: ChartBar },
   { href: "/darwin", label: "Darwin Fuzzing", icon: Dna },
+  { href: "/audio/darwin", label: "Darwin Audio", icon: Waveform },
+  { href: "/regressions", label: "Regressions", icon: Flask },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
