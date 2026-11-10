@@ -7,6 +7,12 @@
 import { API_URL, ApiError, getToken } from "./api";
 import type {
   AudioBenchmark,
+  DatasetInfo,
+  DriftComparisonView,
+  DriftSnapshotView,
+  RobustnessReport,
+  SecurityAuditEvent,
+  SecurityHealth,
   AudioPersona,
   AudioRegressionCase,
   AudioRegressionReplay,
@@ -147,6 +153,27 @@ export const Benchmarks = {
 };
 
 export type { BenchmarkEngineResult };
+
+export const Analytics = {
+  robustness: () => fetchJson<RobustnessReport>("/api/v1/analytics/robustness"),
+  listDatasets: () => fetchJson<DatasetInfo[]>("/api/v1/analytics/datasets"),
+  createSnapshot: (dataset: string, engineId: string) =>
+    fetchJson<DriftSnapshotView>(
+      `/api/v1/analytics/datasets/${dataset}/snapshot?engine_id=${encodeURIComponent(engineId)}`,
+      { method: "POST" },
+    ),
+  listSnapshots: (dataset: string) =>
+    fetchJson<DriftSnapshotView[]>(`/api/v1/analytics/datasets/${dataset}/snapshots`),
+  compare: (dataset: string, baselineId: number, currentId: number) =>
+    fetchJson<DriftComparisonView>(
+      `/api/v1/analytics/datasets/${dataset}/compare?baseline_id=${baselineId}&current_id=${currentId}`,
+    ),
+};
+
+export const Security = {
+  health: () => fetchJson<SecurityHealth>("/api/v1/security/health"),
+  audit: () => fetchJson<SecurityAuditEvent[]>("/api/v1/security/audit"),
+};
 
 async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();

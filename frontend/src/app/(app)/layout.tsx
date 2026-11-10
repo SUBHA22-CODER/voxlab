@@ -24,6 +24,7 @@ const NAV = [
   { href: "/playground", label: "Playground", icon: Microphone },
   { href: "/audio", label: "Audio Lab", icon: Waveform },
   { href: "/benchmarks", label: "Benchmarks", icon: ChartLine },
+  { href: "/analytics", label: "Analytics", icon: ChartBar },
   { href: "/agents", label: "Agents", icon: Robot },
   { href: "/scenarios", label: "Scenarios", icon: Lightning },
   { href: "/runs", label: "Test Runs", icon: ChartBar },

@@ -6,6 +6,8 @@ import { Waveform, UploadSimple, Play, ArrowsLeftRight } from "@phosphor-icons/r
 import { AudioEngines, AudioTranscribe } from "@/lib/audio-api";
 import type { EngineInfo, TranscriptionResult } from "@/lib/audio-types";
 import { AudioMetricBars } from "@/components/audio/metric-bars";
+import { WordDiff } from "@/components/audio/word-diff";
+import type { SemanticErrorView } from "@/lib/audio-types";
 import {
   Badge,
   Button,
@@ -292,6 +294,47 @@ export default function AudioLabPage() {
                         <span className="text-sm text-zinc-300">{seg.text}</span>
                       </div>
                     ))}
+                  </CardBody>
+                </Card>
+              )}
+
+              {result.semantic && result.semantic.errors.length > 0 && (
+                <Card>
+                  <CardHeader
+                    right={
+                      <Badge tone={result.semantic.meaning_preserved ? "green" : "red"}>
+                        {result.semantic.meaning_preserved ? "meaning preserved" : "meaning changed"}
+                      </Badge>
+                    }
+                  >
+                    Semantic error analysis
+                  </CardHeader>
+                  <CardBody className="space-y-2">
+                    {result.semantic.errors.map((err: SemanticErrorView, i: number) => (
+                      <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[11px] text-zinc-400">{err.type.replace(/_/g, " ")}</span>
+                          <Badge tone={err.severity === "critical" ? "red" : err.severity === "major" ? "amber" : "zinc"}>
+                            {err.severity}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-400">{err.description}</p>
+                        {err.reference && <p className="mt-1 text-[11px] text-zinc-500">reference: {err.reference}</p>}
+                        {err.hypothesis && <p className="text-[11px] text-zinc-500">transcript: {err.hypothesis}</p>}
+                      </div>
+                    ))}
+                    <p className="text-[10px] text-zinc-600">
+                      deterministic layer (ground truth). LLM judgment is opt-in via use_llm_judge and always labeled separately.
+                    </p>
+                  </CardBody>
+                </Card>
+              )}
+
+              {result.alignment && (
+                <Card>
+                  <CardHeader>Word-level comparison</CardHeader>
+                  <CardBody>
+                    <WordDiff alignment={result.alignment} />
                   </CardBody>
                 </Card>
               )}

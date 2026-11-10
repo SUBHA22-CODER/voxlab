@@ -57,6 +57,63 @@ export interface TranscriptMetricsReport {
   definitions: Record<string, string>;
 }
 
+export interface WordTimingPoint {
+  word_index: number;
+  start_seconds: number;
+  end_seconds: number;
+  confidence: number | null;
+}
+
+export interface AlignedTokenView {
+  operation: "correct" | "substitution" | "insertion" | "deletion" | string;
+  ref_index: number | null;
+  hyp_index: number | null;
+  ref_word: string | null;
+  hyp_word: string | null;
+  severity: string | null;
+  start_seconds: number | null;
+  end_seconds: number | null;
+  confidence: number | null;
+  explanation: string | null;
+}
+
+export interface AlignmentView {
+  tokens: AlignedTokenView[];
+  counts: {
+    reference_words: number;
+    hypothesis_words: number;
+    correct: number;
+    substitutions: number;
+    insertions: number;
+    deletions: number;
+  };
+}
+
+export interface SemanticErrorView {
+  type: string;
+  severity: string;
+  description: string;
+  reference: string | null;
+  hypothesis: string | null;
+  ref_index: number | null;
+  hyp_index: number | null;
+}
+
+export interface SemanticAnalysisView {
+  meaning_preserved: boolean;
+  error_count: number;
+  errors: SemanticErrorView[];
+}
+
+export interface LLMJudgmentView {
+  layer: "llm";
+  available: boolean;
+  meaning_preserved: boolean | null;
+  confidence: number | null;
+  errors: Array<Record<string, unknown>>;
+  provenance: Record<string, unknown>;
+}
+
 export interface TranscriptionResult {
   engine: string;
   text: string;
@@ -66,7 +123,75 @@ export interface TranscriptionResult {
   duration_seconds: number;
   processing_time_seconds: number;
   metadata: Record<string, unknown>;
+  word_timings: WordTimingPoint[];
   metrics: TranscriptMetricsReport | null;
+  alignment: AlignmentView | null;
+  semantic: SemanticAnalysisView | null;
+  llm_judgment: LLMJudgmentView | null;
+}
+
+// --- analytics (Phases 5+6) ---
+
+export interface BucketStat { count: number; mean_wer: number | null; }
+
+export interface RobustnessReport {
+  total_findings: number;
+  filters: Record<string, string | null>;
+  by_persona: Record<string, BucketStat>;
+  by_noise_level: Record<string, BucketStat>;
+  by_speaking_speed: Record<string, BucketStat>;
+  by_duration: Record<string, BucketStat>;
+  note: string;
+}
+
+export interface DatasetInfo { name: string; case_count: number; description: string; }
+
+export interface DriftSnapshotView {
+  id: number;
+  dataset_name: string;
+  engine: string;
+  model_version: string;
+  case_count: number;
+  mean_wer: number;
+  mean_cer: number;
+  mean_rtf: number;
+  created_at: string;
+}
+
+export interface DriftComparisonView {
+  dataset: string;
+  baseline: DriftSnapshotView;
+  current: DriftSnapshotView;
+  paired_cases: number;
+  deltas: { wer: number | null; cer: number | null; rtf: number | null };
+  wer_ci_95: [number | null, number | null];
+  significant: boolean | null;
+  regression_detected: boolean;
+  note: string;
+  per_case: Array<{ case_id: string; wer_baseline: number; wer_current: number; wer_delta: number }>;
+}
+
+export interface SecurityAuditEvent {
+  id: number;
+  event_type: string;
+  detail: Record<string, unknown>;
+  source_ip: string | null;
+  created_at: string;
+}
+
+export interface SecurityHealth {
+  status: string;
+  checked_at: string;
+  database: { reachable: boolean; revoked_tokens: number };
+  auth: {
+    token_type: string;
+    revocation: string;
+    demo_bypass_removed: boolean;
+    rate_limit_rules: Array<{ path: string; window_seconds: number; max_requests: number }>;
+  };
+  retention: { audio_retention_days: number; storage_dir: string };
+  engines: Array<{ engine_id: string; installed: boolean }>;
+  own_audit_events: number;
 }
 
 export interface AudioPersona {
