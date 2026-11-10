@@ -32,7 +32,7 @@ if "sqlite" in _settings.database_url:
             cursor.execute("PRAGMA journal_mode=WAL")
             cursor.execute("PRAGMA busy_timeout=60000")
             cursor.execute("PRAGMA synchronous=NORMAL")
-        except Exception:
+        except Exception:  # noqa: BLE001 - PRAGMA setup must never block startup
             pass
         finally:
             cursor.close()
@@ -41,7 +41,7 @@ SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=
 
 
 async def init_db() -> None:
-    from app import models  # noqa: F401  (register mappers)
+    from app import models  # noqa: F401 - registers ORM mappers before create_all
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

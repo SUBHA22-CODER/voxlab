@@ -28,7 +28,7 @@ async def main():
                 db.add_all([a1, a2])
                 print(f"Provisioned starter agents for user {u.id} ({u.email})")
         await db.commit()
-        
+
         all_agents = (await db.scalars(select(Agent))).all()
         print(f"Total agents now in DB: {len(all_agents)}")
         for a in all_agents:

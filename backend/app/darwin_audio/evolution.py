@@ -218,7 +218,7 @@ class DarwinAudioEngine:
                 scored, key=lambda r: r.rewarded_score, reverse=True
             )
             survivors = [r.genome for r in ranked[:top_k]]
-            next_population: list[AudioGenome] = [g for g in survivors]
+            next_population: list[AudioGenome] = list(survivors)
             while len(next_population) < population_size:
                 if rng.random() < 0.5 and len(survivors) >= 2:
                     a, b = rng.sample(survivors, 2)

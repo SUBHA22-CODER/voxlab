@@ -8,7 +8,6 @@ from sqlalchemy.pool import NullPool
 from starlette.testclient import TestClient
 
 from app.core.database import Base
-from tests.scripted_agent import ScriptedAgentAdapter
 
 pytestmark = pytest.mark.integration
 
@@ -67,7 +66,7 @@ class TestPlaygroundWebSocket:
         monkeypatch.setattr("app.main.init_db", _noop)
         monkeypatch.setattr("app.main.load_builtin_scenarios", _noop)
         with TestClient(app) as tc:
-            with pytest.raises(Exception):
+            with pytest.raises(Exception):  # noqa: B017 - asserts any transport failure
                 with tc.websocket_connect(f"/ws/playground/{agent.id}?token=bad"):
                     tc.receive_json()  # pragma: no cover
 

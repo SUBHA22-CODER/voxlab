@@ -93,7 +93,7 @@ class WhisperLocalEngine(SpeechEngine):
     @classmethod
     def is_available(cls) -> bool:
         try:
-            import faster_whisper  # noqa: F401
+            import faster_whisper  # noqa: F401 - availability probe
         except ImportError:
             return False
         return True
@@ -189,7 +189,7 @@ class WhisperLocalEngine(SpeechEngine):
             )
             for _segment in segments:
                 pass
-        except Exception as exc:  # noqa: BLE001 - warmup is best-effort, never fatal
+        except Exception as exc:  # noqa: BLE001 - warmup is best-effort
             logger.debug("whisper_local warmup skipped: %s", exc)
 
     async def health_check(self) -> EngineHealth:

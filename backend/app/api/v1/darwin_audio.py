@@ -24,7 +24,7 @@ from app.darwin_audio.evolution import DarwinAudioEngine
 from app.darwin_audio.personas import AUDIO_PERSONAS
 from app.darwin_audio.personas import get_audio_personas as resolve_personas
 from app.models import User, utcnow
-from app.models.darwin_audio import AudioFinding, DarwinAudioRun
+from app.models.darwin_audio import DarwinAudioRun
 from app.schemas.audio import (
     DarwinAudioFindingOut,
     DarwinAudioRunCreate,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -188,7 +188,7 @@ async def replay_case(
         "hypothesis": result.text,
         "engine": engine.engine_id(),
         "model": engine.get_metadata().model,
-        "at": datetime.now(timezone.utc).isoformat(),
+        "at": datetime.now(UTC).isoformat(),
     }
     await db.commit()
 

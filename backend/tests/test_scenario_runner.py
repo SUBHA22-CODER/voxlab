@@ -71,7 +71,7 @@ class TestScenarioRunner:
                 {"type": "silence"},
             ],
         }
-        runner, collector = make_runner(definition, adapter)
+        runner, collector = make_runner(definition, adapter)  # noqa: RUF059 - fixture parity with other tests
         await runner.run()
 
         assert adapter.turns[1][0] == ""

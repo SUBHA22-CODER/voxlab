@@ -115,7 +115,7 @@ def apply_transform(samples: np.ndarray, sample_rate: int, spec: TransformSpec) 
         raise TransformError(f"Unknown transform operator: '{spec.operator}'.")
     fn, bounds = entry
     params = dict(spec.params)
-    for key, (expected_type, low, high) in bounds.items():
+    for key, (_expected_type, low, high) in bounds.items():
         if key not in params:
             continue  # defaults are applied inside the operator
         value = params[key]

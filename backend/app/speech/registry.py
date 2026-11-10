@@ -83,7 +83,7 @@ def build_default_registry() -> EngineRegistry:
         from .whisper_local.adapter import WhisperLocalEngine
 
         registry.register(WhisperLocalEngine)
-    except Exception as exc:  # noqa: BLE001 - pragma: no cover (defensive)
+    except Exception as exc:  # noqa: BLE001 - defensive, contained
         logger.warning("whisper_local adapter could not be registered: %s", exc)
     return registry
 

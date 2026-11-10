@@ -1,0 +1,49 @@
+# Ruff configuration for the VoxLab backend.
+# Pinned rule set: catches real defects (F, E, B, UP, SIM, RUF, BLE, C4)
+# while accepting established FastAPI idioms (B008 Depends-in-defaults is the
+# framework's documented pattern) and keeping the 1.x legacy codebase's
+# accepted patterns (bare excepts in two defensive handlers are noqa'd).
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+    "C4",  # flake8-comprehensions
+    "BLE", # blind except (explicitly justified with noqa where intended)
+]
+ignore = [
+    "B008", # FastAPI Depends()/Form() in argument defaults is the framework idiom
+    "E501", # line length handled by the formatter; docstrings may exceed
+    "SIM108", # ternary is not always clearer
+    "RUF012", # mutable class attributes are used intentionally (registry state)
+    "RUF001", # unicode chars in comments/docstrings (arrows, ×) are deliberate
+    "RUF002",
+    "RUF003",
+    "SIM105", # contextlib.suppress is not clearer than try/except here
+    "SIM117", # nested with in tests reads fine
+    "B904",   # raise-from migration for the legacy modules is follow-up work
+]
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "B011",   # assert False is legitimate in tests
+    "RUF029", # unawaited coroutines are asserted by the framework
+    "SIM115", # open file handles managed by pytest tmp fixtures
+]
+"scripts/*" = ["T201", "F841"] # demo/audit scripts: print on purpose, unused locals allowed
+"app/models/__init__.py" = ["F401"] # intentional re-export surface (ORM registry)
+"app/engine/*" = ["E741"]          # legacy single-letter loop vars in scoring math
+"app/darwin/*" = ["BLE001", "E741", "SIM102"] # legacy guarded catches + scoring vars
+"app/adapters/*" = ["BLE001"] # legacy guarded network catches
+"app/api/agents.py" = ["BLE001"] # legacy guarded registration/probe catches
+"app/api/playground.py" = ["BLE001"] # legacy guarded WS-frame catches
+"app/engine/orchestrator.py" = ["BLE001"] # legacy guarded task cleanup
+"app/services/llm.py" = ["BLE001"] # legacy guarded client fallbacks
+"app/workers/runner.py" = ["BLE001"] # legacy guarded queue dispatch

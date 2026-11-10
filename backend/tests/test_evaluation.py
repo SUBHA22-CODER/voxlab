@@ -8,18 +8,18 @@ from app.services.llm import LLMService
 
 
 def make_output(**overrides) -> RunOutput:
-    base = dict(
-        transcript=[
+    base = {
+        "transcript": [
             {"role": "user", "content": "check my order", "turn": 1, "kind": "user_message"},
             {"role": "agent", "content": "Your order is shipped.", "turn": 1, "latency_ms": 300},
         ],
-        tool_calls=[{"turn": 1, "name": "check_order_status", "status": "success", "duration_ms": 40}],
-        final_state={"turns": 1},
-        turn_latencies_ms=[300],
-        injected_tool_failures=0,
-        error_turns=[],
-        agent_error=None,
-    )
+        "tool_calls": [{"turn": 1, "name": "check_order_status", "status": "success", "duration_ms": 40}],
+        "final_state": {"turns": 1},
+        "turn_latencies_ms": [300],
+        "injected_tool_failures": 0,
+        "error_turns": [],
+        "agent_error": None,
+    }
     base.update(overrides)
     return RunOutput(**base)
 

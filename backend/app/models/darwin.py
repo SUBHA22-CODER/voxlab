@@ -27,10 +27,10 @@ class DarwinRun(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    findings: Mapped[list["DarwinFinding"]] = relationship(
+    findings: Mapped[list[DarwinFinding]] = relationship(
         back_populates="run", cascade="all, delete-orphan"
     )
-    generations_data: Mapped[list["DarwinGeneration"]] = relationship(
+    generations_data: Mapped[list[DarwinGeneration]] = relationship(
         back_populates="run", cascade="all, delete-orphan", order_by="DarwinGeneration.generation_index"
     )
 
@@ -46,7 +46,7 @@ class DarwinGeneration(Base):
     stats: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    run: Mapped["DarwinRun"] = relationship(back_populates="generations_data")
+    run: Mapped[DarwinRun] = relationship(back_populates="generations_data")
 
 
 class DarwinFinding(Base):
@@ -70,4 +70,4 @@ class DarwinFinding(Base):
     patch_proposal: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    run: Mapped["DarwinRun"] = relationship(back_populates="findings")
+    run: Mapped[DarwinRun] = relationship(back_populates="findings")

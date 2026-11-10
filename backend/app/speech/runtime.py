@@ -58,7 +58,6 @@ async def engine_dependency(engine_id: str = "whisper_local") -> SpeechEngine:
 
 def artifact_store():
     from ..darwin_audio.artifacts import AudioArtifactStore
-    from .audio import TARGET_SAMPLE_RATE  # noqa: F401 - side-import guard
 
     return AudioArtifactStore(get_settings().audio_storage_dir)
 

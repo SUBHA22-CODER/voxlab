@@ -17,11 +17,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Ruff
-        run: pip install ruff
+      - name: Install pinned Ruff
+        run: pip install "ruff==0.14.4"
 
       - name: Run Ruff Linter
         run: |
           cd backend
           ruff check .
-

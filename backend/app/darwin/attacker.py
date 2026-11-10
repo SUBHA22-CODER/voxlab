@@ -32,7 +32,7 @@ class Attacker:
         Returns: (message_content, is_heuristic: bool)
         """
         persona = get_persona(genome.persona)
-        
+
         # If no LLM client available, fall back to persona's heuristic bank
         if not self.llm.available:
             return self._heuristic_message(persona, genome, turn_index, step_type), True
@@ -78,7 +78,7 @@ class Attacker:
             if response and response.strip():
                 clean = response.strip().strip('"').strip("'")
                 return clean, False
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("LLM attacker failed, falling back to heuristic: %s", exc)
 
         return self._heuristic_message(persona, genome, turn_index, step_type), True
@@ -112,7 +112,7 @@ class Attacker:
         for i, step in enumerate(genome.steps):
             stype = step.get("type", "user_message")
             content = step.get("content", "")
-            
+
             if not content:
                 content, is_heur = await self.generate_turn_message(
                     genome=genome,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -16,7 +15,7 @@ from app.darwin.patcher import Patcher
 from app.darwin.personas import get_active_personas
 from app.darwin.regression import export_finding_to_regression
 from app.models import Agent, User
-from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun
+from app.models.darwin import DarwinFinding, DarwinRun
 from app.schemas.darwin import (
     DarwinFindingOut,
     DarwinPersonaOut,

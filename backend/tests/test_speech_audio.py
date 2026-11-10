@@ -12,9 +12,9 @@ import pytest
 
 pytest.importorskip("numpy", reason="speech audio tests need numpy (requirements-speech.txt)")
 
-import numpy as np  # noqa: E402
+import numpy as np
 
-from app.speech.audio import (  # noqa: E402
+from app.speech.audio import (
     detect_silence,
     load_audio,
     peak_normalize,
@@ -22,14 +22,14 @@ from app.speech.audio import (  # noqa: E402
     validate_duration,
     LoadedAudio,
 )
-from app.speech.base import AudioData, EngineCapabilities, SpeechEngine  # noqa: E402
-from app.speech.exceptions import (  # noqa: E402
+from app.speech.base import AudioData, EngineCapabilities, SpeechEngine
+from app.speech.exceptions import (
     AudioCorrupt,
     AudioTooLarge,
     EngineNotInstalled,
     UnsupportedAudioFormat,
 )
-from app.speech.registry import EngineRegistry  # noqa: E402
+from app.speech.registry import EngineRegistry
 
 SR = 16000
 
@@ -99,7 +99,6 @@ def test_load_8bit_and_32bit_wav():
 
 
 def test_24bit_wav_rejected_with_clear_error():
-    tone = _tone(0.05)  # noqa: F841 - kept for symmetry with other tests
     # Build a real 24-bit header by hand (wave module cannot write it).
     frames = b"\x00\x00\x00" * int(0.05 * SR)
     byte_rate = SR * 1 * 3

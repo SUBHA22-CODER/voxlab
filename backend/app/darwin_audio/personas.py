@@ -2,7 +2,7 @@
 # Audio attack personas for the Darwin audio engine. Each persona bundles a
 # preset chain of seeded audio transformations; "content" personas additionally
 # mutate the seed transcript and re-synthesize audio when offline TTS is
-# available (Windows SAPI — a default synthetic voice, never a real-person
+# available (Windows SAPI, a default synthetic voice, never a real-person
 # clone). Existing text-Darwin personas are untouched: these are additive.
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ NOISY_ENVIRONMENT_SPEAKER = AudioPersona(
 FAST_TECHNICAL_SPEAKER = AudioPersona(
     id="fast_technical_speaker",
     name="Fast Technical Speaker",
-    description="Rapid speech over a narrow channel — stresses technical terms.",
+    description="Rapid speech over a narrow channel, stressing technical terms.",
     preset=(
         _spec("tape_speed_change", 201, rate=1.35),
         _spec("telephony_bandpass", 202, low_hz=300.0, high_hz=3400.0),
@@ -89,7 +89,7 @@ DOMAIN_CHANNEL_SPEAKER = AudioPersona(
 MUMBLING_UNCLEAR_SPEAKER = AudioPersona(
     id="mumbling_unclear_speaker",
     name="Mumbling Unclear Speaker",
-    description="Pumped volume, dark tone, clipped edges — articulation stress.",
+    description="Pumped volume, dark tone, clipped edges for articulation stress.",
     preset=(
         _spec("volume_pump", 601, rate_hz=3.0, depth=0.5),
         _spec("lowpass_muffle", 602, cutoff_hz=1800.0),

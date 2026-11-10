@@ -70,7 +70,7 @@ async def update_agent(
     db: AsyncSession = Depends(get_db),
 ):
     data = body.model_dump(exclude_unset=True)
-    if "endpoint" in data and data["endpoint"]:
+    if data.get("endpoint"):
         try:
             data["endpoint"] = validate_endpoint(data["endpoint"])
         except EndpointValidationError as exc:
@@ -122,12 +122,12 @@ async def test_connection(
             result = await adapter.send_message("", {"signal": "ping"})
             ok = result.error is None
             detail = result.reply[:200] if ok else f"agent error: {result.error}"
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         detail = f"connection failed: {exc.__class__.__name__}: {exc}"[:300]
     finally:
         try:
             await adapter.disconnect()
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
 
     latency_ms = int((time.perf_counter() - started) * 1000)

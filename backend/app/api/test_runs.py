@@ -159,6 +159,6 @@ async def get_run_report(
     if report is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
-            "Report not generated yet (run status: %s)" % run.status,
+            f"Report not generated yet (run status: {run.status})",
         )
     return report

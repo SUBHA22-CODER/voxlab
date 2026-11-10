@@ -6,13 +6,11 @@ and Performance Benchmarks for VoxLab.
 from __future__ import annotations
 
 import asyncio
-import copy
 import json
 import os
-import sys
 import time
 import httpx
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 BACKEND_URL = "http://localhost:8001"
 SUPPORT_AGENT_URL = "http://localhost:8100"
@@ -23,7 +21,7 @@ results_summary = {
     "test_cases_voice": [],
     "security_checks": [],
     "performance": {},
-    "timestamp": datetime.now(timezone.utc).isoformat(),
+    "timestamp": datetime.now(UTC).isoformat(),
 }
 
 async def login(client: httpx.AsyncClient, email: str = "demo@voxlab.dev", password: str = "demo123") -> str:
@@ -57,7 +55,7 @@ async def run_phase2_e2e(client: httpx.AsyncClient, token: str):
     test_agent = r_reg.json()
     test_agent_id = test_agent["id"]
     print(f"[PASS] Agent registered with ID {test_agent_id}")
-    
+
     # Confirm secrets protection: auth_config should not be leaked in plaintext
     assert "api_key" not in json.dumps(test_agent), "Security issue: plain api_key in AgentOut!"
     print("[PASS] Secret protection verified: credentials encrypted in DB and omitted from AgentOut")
@@ -180,7 +178,7 @@ async def run_phase2_e2e(client: httpx.AsyncClient, token: str):
     expected_score = round(sum(weights[k] * components[k] for k in components), 2)
     assert abs(score - expected_score) <= 0.05, f"Report score mismatch! Got {score}, expected {expected_score}"
     print(f"[PASS] Report score verified: {score} matches formula 0.30T + 0.25Q + 0.20R + 0.15L + 0.10E")
-    
+
     # Export report
     r_rep_exp = await client.get(f"{BACKEND_URL}/api/reports/{run_id}/export", headers=headers)
     assert r_rep_exp.status_code == 200
@@ -200,7 +198,7 @@ async def run_phase4_voice_failures(client: httpx.AsyncClient, token: str, agent
     print(">>> PHASE 4: REALISTIC VOICE AI FAILURE TESTING (12 CASES)")
     print("=======================================================")
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     test_cases = [
         {
             "id": "TC-VOICE-01",
@@ -323,23 +321,15 @@ async def run_phase4_voice_failures(client: httpx.AsyncClient, token: str, agent
         r_turn = await client.post(f"{tc['agent_url']}/conversation", json={
             "session_id": sess_uuid,
             "message": tc["input"],
-            "metadata": {"interrupt": True if "interruption" in tc["category"] else False}
+            "metadata": {"interrupt": "interruption" in tc["category"]}
         })
         actual_reply = r_turn.json().get("reply", "")
         error = r_turn.json().get("error")
         tool_calls = r_turn.json().get("tool_calls", [])
-        
+
         # Evaluate failure detection
         detected = False
-        if tc["category"] == "self_correction_missed" and ("tuesday" in actual_reply.lower() or "wait" in actual_reply.lower()):
-            detected = True
-        elif tc["category"] == "filler_not_removed" and any(w in actual_reply.lower() for w in ["um", "uh", "you know"]):
-            detected = True
-        elif tc["category"] == "interruption_ignored" and r_turn.json().get("interrupted") is True:
-            detected = True
-        elif tc["category"] == "hallucination" and ("nadella" not in actual_reply or "pichai" not in actual_reply):
-            detected = True
-        elif error is not None:
+        if (tc["category"] == "self_correction_missed" and ("tuesday" in actual_reply.lower() or "wait" in actual_reply.lower())) or (tc["category"] == "filler_not_removed" and any(w in actual_reply.lower() for w in ["um", "uh", "you know"])) or (tc["category"] == "interruption_ignored" and r_turn.json().get("interrupted") is True) or (tc["category"] == "hallucination" and ("nadella" not in actual_reply or "pichai" not in actual_reply)) or error is not None:
             detected = True
         else:
             detected = False
@@ -478,7 +468,7 @@ async def run_phase6_performance(client: httpx.AsyncClient, token: str, agent_id
     print(">>> PHASE 6: PERFORMANCE & RELIABILITY BENCHMARKING")
     print("=======================================================")
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     # 1. API Response Latency (p50, p95, p99 across 50 requests)
     latencies = []
     for _ in range(50):
@@ -486,13 +476,13 @@ async def run_phase6_performance(client: httpx.AsyncClient, token: str, agent_id
         res = await client.get(f"{BACKEND_URL}/api/agents", headers=headers)
         lat = (time.perf_counter() - t0) * 1000
         latencies.append(lat)
-    
+
     latencies.sort()
     p50 = latencies[int(len(latencies) * 0.50)]
     p95 = latencies[int(len(latencies) * 0.95)]
     p99 = latencies[int(len(latencies) * 0.99)]
     avg = sum(latencies) / len(latencies)
-    
+
     print(f"API Latency (/api/agents): Avg={avg:.2f}ms, p50={p50:.2f}ms, p95={p95:.2f}ms, p99={p99:.2f}ms")
     assert p95 < 150.0, f"p95 latency exceeded 150ms: {p95}ms"
     print("[PASS] API latency meets sub-150ms target")
@@ -532,7 +522,7 @@ async def main():
         await run_phase4_voice_failures(client, token, agent_id)
         await run_phase5_security(client, token, agent_id)
         await run_phase6_performance(client, token, agent_id)
-        
+
         # Save audit artifact
         out_path = os.path.join("..", "docs", "voxlab_audit_execution_data.json")
         with open(out_path, "w", encoding="utf-8") as fp:

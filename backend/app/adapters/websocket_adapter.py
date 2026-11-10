@@ -40,7 +40,7 @@ class WebSocketAgentAdapter(VoiceAgentAdapter):
             remaining = max(deadline - time.monotonic(), 0.1)
             try:
                 frame = await asyncio.wait_for(self._ws.recv(), timeout=remaining)
-            except asyncio.TimeoutError as exc:
+            except TimeoutError as exc:
                 raise TimeoutError("agent websocket response timed out") from exc
             data = json.loads(frame)
             if data.get("type") in want_types:
@@ -65,7 +65,7 @@ class WebSocketAgentAdapter(VoiceAgentAdapter):
         )
         try:
             data = await self._recv_until({"agent_response", "error"})
-        except (TimeoutError, Exception) as exc:  # noqa: BLE001 — normalize to result
+        except (TimeoutError, Exception) as exc:
             return AgentTurnResult(
                 error=f"websocket_error: {exc}",
                 timings={"total_ms": int((time.perf_counter() - started) * 1000)},
@@ -90,7 +90,7 @@ class WebSocketAgentAdapter(VoiceAgentAdapter):
         await self._ws.send(audio)  # binary audio passthrough
         try:
             data = await self._recv_until({"agent_response", "error"})
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return AgentTurnResult(error=f"websocket_error: {exc}")
         return AgentTurnResult(
             reply=str(data.get("reply") or ""),

@@ -1,7 +1,6 @@
 """Tests for the HTTP adapter: contract mapping and failure normalization."""
 
 import httpx
-import pytest
 
 from app.adapters.http_adapter import HTTPAgentAdapter
 

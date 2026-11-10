@@ -62,7 +62,7 @@ class Orchestrator:
         except asyncio.CancelledError:
             await self._mark_run(run_id, status="cancelled")
             logger.info("Run %s cancelled", run_id)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.exception("Run %s failed", run_id)
             await self._mark_run(run_id, status="failed", error=str(exc)[:2000])
 
@@ -104,7 +104,7 @@ class Orchestrator:
                     session_row.finished_at = utcnow()
                     await db.commit()
                     raise
-                except Exception as exc:  # noqa: BLE001 — isolate session failures
+                except Exception as exc:
                     logger.exception("Session failed for scenario %s", scenario.name)
                     session_row.status = "failed"
                     session_row.finished_at = utcnow()
@@ -152,7 +152,7 @@ class Orchestrator:
         finally:
             try:
                 await adapter.disconnect()
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
 
         status = "failed" if output.agent_error and not output.transcript else "completed"

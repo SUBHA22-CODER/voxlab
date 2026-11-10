@@ -1,6 +1,5 @@
 """Tests for password hashing, JWT tokens, and credential encryption."""
 
-import pytest
 
 from app.core.security import (
     create_access_token,

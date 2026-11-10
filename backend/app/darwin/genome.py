@@ -6,10 +6,10 @@ import copy
 import hashlib
 import json
 import random
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import Any
 
-from app.darwin.personas import PERSONAS, get_active_personas, get_persona
+from app.darwin.personas import get_active_personas, get_persona
 
 
 @dataclass
@@ -59,12 +59,12 @@ class Genome:
     def compile_to_scenario(self) -> dict[str, Any]:
         """Emits the existing scenario JSON format compatible with scenario_runner.py."""
         p = get_persona(self.persona)
-        
+
         # Build deterministic baseline checks
         checks: list[dict[str, Any]] = [
             {"type": "reply_nonempty", "turn": -1},
         ]
-        
+
         # Dictation-specific checks if persona is dictation-focused
         if p.is_dictation_focused:
             if self.persona == "self_corrector":
@@ -79,7 +79,7 @@ class Genome:
                     "any_of": ["um", "uh", "you know"],
                     "turn": -1,
                 })
-        
+
         return {
             "name": f"Darwin [{p.name}] {self.strategy[:35]}",
             "category": self.persona,
@@ -105,11 +105,11 @@ def create_random_genome(
     r = rng or random.Random(seed)
     persona = get_persona(persona_id)
     strategy = r.choice(persona.strategies) if persona.strategies else "adversarial probe"
-    
+
     # Start with 2 to 4 turns from the persona heuristic bank or generated prompts
     num_steps = r.randint(2, 4)
     steps: list[dict[str, Any]] = []
-    
+
     bank = persona.heuristic_bank
     for _ in range(num_steps):
         content = r.choice(bank) if bank else "Hello, I need help."
@@ -138,17 +138,17 @@ def swap_persona(genome: Genome, rng: random.Random) -> Genome:
         return copy.deepcopy(genome)
     new_persona = rng.choice(available)
     p_def = get_persona(new_persona)
-    
+
     new_genome = copy.deepcopy(genome)
     new_genome.persona = new_persona
     new_genome.parent_ids = [genome.id]
-    
+
     # Optionally replace a step with new persona content
     if new_genome.steps and p_def.heuristic_bank:
         idx = rng.randint(0, len(new_genome.steps) - 1)
         step_type = new_genome.steps[idx].get("type", "user_message")
         new_genome.steps[idx] = {"type": step_type, "content": rng.choice(p_def.heuristic_bank)}
-        
+
     new_genome.id = new_genome.compute_hash()
     return new_genome
 
@@ -158,7 +158,7 @@ def inject_interruption(genome: Genome, rng: random.Random) -> Genome:
     new_genome = copy.deepcopy(genome)
     p_def = get_persona(new_genome.persona)
     content = rng.choice(p_def.heuristic_bank) if p_def.heuristic_bank else "Wait, stop right there!"
-    
+
     insert_idx = rng.randint(1, max(1, len(new_genome.steps)))
     new_genome.steps.insert(insert_idx, {"type": "interrupt", "content": content})
     new_genome.parent_ids = [genome.id]
@@ -181,11 +181,11 @@ def extend_conversation(genome: Genome, rng: random.Random) -> Genome:
     new_genome = copy.deepcopy(genome)
     p_def = get_persona(new_genome.persona)
     extra_count = rng.randint(1, 2)
-    
+
     for _ in range(extra_count):
         content = rng.choice(p_def.heuristic_bank) if p_def.heuristic_bank else "What did I ask previously?"
         new_genome.steps.append({"type": "user_message", "content": content})
-        
+
     new_genome.parent_ids = [genome.id]
     new_genome.id = new_genome.compute_hash()
     return new_genome
@@ -195,14 +195,14 @@ def crossover(parent_a: Genome, parent_b: Genome, rng: random.Random | None = No
     """Splices the first half of parent A's steps onto the second half of parent B."""
     steps_a = parent_a.steps
     steps_b = parent_b.steps
-    
+
     split_a = max(1, len(steps_a) // 2)
     split_b = max(1, len(steps_b) // 2)
-    
+
     combined_steps = copy.deepcopy(steps_a[:split_a]) + copy.deepcopy(steps_b[split_b:])
     if not combined_steps:
         combined_steps = copy.deepcopy(steps_a)
-        
+
     # Inherit persona and strategy from parent A
     child = Genome(
         persona=parent_a.persona,

@@ -24,13 +24,13 @@ pytest.importorskip(
     reason="real engine tests need the speech extra (requirements-speech.txt)",
 )
 
-import numpy as np  # noqa: E402
+import numpy as np
 
-from app.speech.audio import load_audio, prepare_engine_audio  # noqa: E402
-from app.speech.base import AudioData  # noqa: E402
-from app.speech.exceptions import TranscriptionFailed  # noqa: E402
-from app.speech.whisper_local.adapter import WhisperLocalEngine  # noqa: E402
-from app.speech.whisper_local.config import WhisperLocalConfig  # noqa: E402
+from app.speech.audio import load_audio, prepare_engine_audio
+from app.speech.base import AudioData
+from app.speech.exceptions import TranscriptionFailed
+from app.speech.whisper_local.adapter import WhisperLocalEngine
+from app.speech.whisper_local.config import WhisperLocalConfig
 
 REFERENCE_TEXT = (
     "Hello, this is VoxLab testing the new speech recognition engine "
@@ -53,7 +53,7 @@ def _generate_sapi_wav(destination: Path) -> Path:
         f"$s.Speak('{SAPI_PHRASE}'); "
         "$s.Dispose()"
     )
-    result = subprocess.run(  # noqa: S602 - fixed local command
+    result = subprocess.run(
         ["powershell", "-NoProfile", "-Command", script],
         capture_output=True,
         text=True,

@@ -1,6 +1,6 @@
 """SQLAlchemy models — VoxLab data model (spec §4)."""
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +9,7 @@ from app.core.database import Base
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class User(Base):

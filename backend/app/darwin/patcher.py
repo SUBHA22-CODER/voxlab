@@ -18,7 +18,7 @@ from app.darwin.diagnoser import DiagnosisCategory
 from app.engine.evaluation_engine import EvaluationEngine
 from app.engine.scenario_runner import ScenarioRunner
 from app.engine.trace_collector import TraceCollector
-from app.models import Agent, Scenario
+from app.models import Agent
 from app.models.darwin import DarwinFinding
 from app.services.llm import LLMService
 
@@ -161,7 +161,7 @@ class Patcher:
         runner = ScenarioRunner(adapter, scenario_with_config, collector)
         try:
             out = await runner.run()
-            scores, fb = await engine.evaluate(scenario_def, out)
+            scores, _fb = await engine.evaluate(scenario_def, out)
             t = float(scores.get("task_completion", 80))
             q = float(scores.get("response_quality", 80))
             r = float(scores.get("context_retention", 80))

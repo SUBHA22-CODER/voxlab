@@ -27,7 +27,6 @@ from app.speech.base import (
     EngineCapabilities,
     EngineHealth,
     EngineMetadata,
-    PartialTranscription,
     SpeechEngine,
     TranscriptionResult,
 )

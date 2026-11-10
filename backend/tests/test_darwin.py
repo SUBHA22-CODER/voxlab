@@ -6,8 +6,7 @@ import random
 import pytest
 
 from app.darwin.diagnoser import Diagnoser, DiagnosisCategory
-from app.darwin.evolution import EvolutionEngine
-from app.darwin.fitness import compute_fitness, evaluate_dictation_dimensions
+from app.darwin.fitness import compute_fitness
 from app.darwin.genome import (
     Genome,
     crossover,
@@ -18,10 +17,8 @@ from app.darwin.genome import (
     swap_persona,
 )
 from app.darwin.minimizer import ddmin
-from app.darwin.personas import PERSONAS, get_active_personas
 from app.darwin.regression import compute_regression_hash
 from app.engine.scenario_runner import RunOutput
-from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun
 from app.services.llm import LLMService
 
 
@@ -288,7 +285,7 @@ def test_fitness_is_not_hardcoded_between_different_agents():
 def test_budget_cap_clamping_logic():
     """Verify budget cap of 60 sessions strictly clamps generations."""
     pop_size = 20
-    requested_gens = 10  # 200 sessions > 60
+    # requested 10 generations would mean 200 sessions > 60
     effective_gens = max(1, 60 // pop_size)
     assert effective_gens == 3
     assert effective_gens * pop_size <= 60

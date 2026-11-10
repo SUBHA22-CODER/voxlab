@@ -235,7 +235,7 @@ class Diagnoser:
                     suggested_fix_area=refined.get("suggested_fix_area", base_result.suggested_fix_area),
                     heuristic=False,
                 )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("LLM diagnoser refinement failed: %s", exc)
 
         return base_result

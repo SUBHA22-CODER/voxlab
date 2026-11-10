@@ -9,13 +9,46 @@
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110-teal.svg)](https://fastapi.tiangolo.com)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.4.3-black.svg)](https://nextjs.org)
-[![Pytest](https://img.shields.io/badge/Pytest-109%20Passed-emerald.svg)](backend/tests/)
+[![Pytest](https://img.shields.io/badge/Pytest-191%20Passed-emerald.svg)](backend/tests/)
 [![Tailored for Wispr Flow](https://img.shields.io/badge/Tailored%20for-Wispr%20Flow-6366f1.svg)](https://wisprflow.ai)
 [![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)
 
 [Documentation](docs/) • [PRD](docs/PRD.md) • [Plan](docs/PLAN.md) • [Architecture](docs/architecture.md) • [Darwin Engine](docs/DARWIN_ENGINE.md) • [API Reference](https://voxlab-2.onrender.com/docs) • [Contributing](CONTRIBUTING.md)
 
 </div>
+
+---
+
+## 🚢 VoxLab 2.0 — Real Audio Reliability Lab
+
+VoxLab now tests the **speech layer itself**. A modular speech-engine stack
+(`backend/app/speech/`) integrates [whisper-local](https://github.com/drajb/whisper-local)
+(MIT, attribution retained) as the first real speech recognition engine, and
+Darwin evolves **adversarial audio** against it:
+
+- **Audio Lab** — upload real audio, transcribe through a real engine, score
+  against a reference with honest WER/CER/number/entity/latency metrics.
+- **Darwin Audio Lab** — 10 attack personas and 14 seeded audio
+  transformations (noise, typing, tape-speed, telephony bandpass, dropouts,
+  content mutations via offline TTS) evolve failing audio; every discovery
+  is minimized to the smallest reproducible transformation chain.
+- **Benchmarks** — identical audio through every installed engine, compared
+  under identical conditions.
+- **Regression Corpus** — persistent, replayable failure cases with
+  fixed / improved / still-failing classification.
+
+Real evidence from one demo run (whisper-tiny, CPU, 17 s):
+`"order forty two"` → `"440Q"`, `"kubernetes deployment"` → `"boyless 440Q"`
+(WER 0.60), chain minimized 4 → 3 transforms with the failure reproduced.
+
+Enable the speech stack: `pip install -r requirements-speech.txt` (fully
+optional; the platform runs and reports engines as not installed without it).
+Docs: [Audio Engine](docs/AUDIO_ENGINE_GUIDE.md) ·
+[Darwin Audio](docs/DARWIN_AUDIO_ENGINE.md) ·
+[Metrics](docs/EVALUATION_METRICS.md) ·
+[Regressions](docs/REGRESSION_TESTING.md) ·
+[Benchmarks](docs/BENCHMARKING.md) ·
+[Implementation Report](docs/FINAL_IMPLEMENTATION_REPORT.md)
 
 ---
 

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Awaitable, Callable
+from typing import Any
+from collections.abc import Awaitable, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ async def ddmin(
     """
     Classic Delta Debugging (ddmin) algorithm adapted for scenario steps.
     Finds a 1-minimal subset of steps that still triggers the failure predicate.
-    
+
     test_fn returns True if the candidate step sequence reproduces the failure.
     Capped at max_evaluations to respect the budget model.
     """
@@ -39,7 +40,7 @@ async def ddmin(
             evaluations_used += 1
             try:
                 reproduces = await test_fn(sub)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.warning("Minimizer test error: %s", exc)
                 reproduces = False
 
@@ -63,7 +64,7 @@ async def ddmin(
                 evaluations_used += 1
                 try:
                     reproduces = await test_fn(complement)
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     logger.warning("Minimizer complement test error: %s", exc)
                     reproduces = False
 

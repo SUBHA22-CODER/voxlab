@@ -9,7 +9,6 @@ import random
 import uuid
 from typing import Any
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.adapters.base import build_adapter
@@ -34,7 +33,7 @@ from app.engine.trace_collector import (
     EVENT_SESSION_STARTED,
     TraceCollector,
 )
-from app.models import Agent, Event, Session, Trace, utcnow
+from app.models import Agent, Session, utcnow
 from app.models.darwin import DarwinFinding, DarwinGeneration, DarwinRun
 from app.services.llm import LLMService
 
@@ -69,7 +68,7 @@ class EvolutionEngine:
         except asyncio.CancelledError:
             await self._mark_status(darwin_run_id, status="cancelled")
             logger.info("Darwin run %s cancelled by user", darwin_run_id)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.exception("Darwin run %s failed: %s", darwin_run_id, exc)
             await self._mark_status(darwin_run_id, status="failed", error=str(exc)[:2000])
 
@@ -332,7 +331,7 @@ class EvolutionEngine:
         try:
             run_output = await runner.run()
             status_val = "completed"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             run_output = RunOutput(agent_error=str(exc))
             status_val = "failed"
 
@@ -376,7 +375,7 @@ class EvolutionEngine:
             test_genome = copy.deepcopy(genome)
             test_genome.steps = test_steps
             scen = test_genome.compile_to_scenario()
-            
+
             collector = TraceCollector(0, "ddmin_trace")
             adapter = build_adapter(
                 {

@@ -90,7 +90,7 @@ async def playground_socket(
         )
         try:
             await adapter.connect()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             await websocket.accept()
             await websocket.send_json(
                 {"type": "error", "message": f"Cannot reach agent: {exc}"[:300]}
@@ -214,10 +214,10 @@ async def playground_socket(
             await db.commit()
             try:
                 await adapter.disconnect()
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
             await db.close()
-    except Exception:  # noqa: BLE001
+    except Exception:
         await db.close()
         raise
 

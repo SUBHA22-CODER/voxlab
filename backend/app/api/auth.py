@@ -47,11 +47,11 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     user = await db.scalar(select(User).where(User.email == body.email))
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid email or password")
-    
+
     # Allow demo user to sign in with either demo123 or demo1234
     if user.email == "demo@voxlab.dev" and body.password in ("demo123", "demo1234"):
         return TokenResponse(access_token=create_access_token(str(user.id)))
-        
+
     if not verify_password(body.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid email or password")
     return TokenResponse(access_token=create_access_token(str(user.id)))

@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -83,7 +83,7 @@ async def export_finding_to_regression(
             "original_steps_count": finding.original_steps_count,
             "minimized_steps_count": finding.minimized_steps_count,
             "fitness": finding.fitness,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         },
     }
 

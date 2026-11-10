@@ -21,16 +21,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine  # noqa: E402
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.core.database import Base  # noqa: E402
-from app.darwin_audio.artifacts import AudioArtifactStore  # noqa: E402
-from app.darwin_audio.evolution import DarwinAudioEngine  # noqa: E402
-from app.models import User  # noqa: E402
-from app.models.darwin_audio import AudioFinding, DarwinAudioRun  # noqa: E402
-from app.speech.audio import load_audio, prepare_engine_audio  # noqa: E402
-from app.speech.registry import engine_registry  # noqa: E402
-from app.speech.tts import synthesize_to_wav  # noqa: E402
+from app.core.database import Base
+from app.darwin_audio.artifacts import AudioArtifactStore
+from app.darwin_audio.evolution import DarwinAudioEngine
+from app.models import User
+from app.models.darwin_audio import AudioFinding, DarwinAudioRun
+from app.speech.audio import load_audio, prepare_engine_audio
+from app.speech.registry import engine_registry
+from app.speech.tts import synthesize_to_wav
 
 
 async def main() -> None:

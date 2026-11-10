@@ -36,7 +36,7 @@ class LLMService:
                     max_retries=1,
                     timeout=10.0,
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.warning("Failed to initialize LLM client: %s", exc)
 
     @property
@@ -65,7 +65,7 @@ class LLMService:
             response = await self._client.chat.completions.create(**kwargs)
             content = response.choices[0].message.content
             return content.strip() if content else None
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("LLM completion failed: %s", exc)
             return None
 

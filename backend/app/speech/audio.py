@@ -159,7 +159,7 @@ def _decode_wav(blob: bytes) -> LoadedAudio:
 
 def _decode_with_av(blob: bytes, container_format: str) -> LoadedAudio:
     try:
-        import av  # type: ignore[import-not-found]
+        import av
     except ImportError as exc:  # pragma: no cover - depends on extras
         raise UnsupportedAudioFormat(
             f"Decoding {container_format} requires the PyAV package "
@@ -228,7 +228,7 @@ def load_audio(
     if blob[:4] == b"RIFF" and blob[8:12] == b"WAVE":
         return _decode_wav(blob)
     try:
-        import av  # noqa: F401  (probe only)
+        import av  # noqa: F401 - availability probe
 
         return _decode_with_av(blob, declared_format or "unknown")
     except ImportError:

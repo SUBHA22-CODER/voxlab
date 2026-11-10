@@ -7,7 +7,6 @@ for an ARQ worker running `execute_run` — the orchestration logic is shared.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from app.core.config import get_settings
@@ -32,7 +31,7 @@ async def dispatch_to_queue(run_id: int) -> bool:
         await pool.enqueue_job("execute_voxlab_run", run_id)
         await pool.aclose()
         return True
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.warning("Redis dispatch failed (%s); falling back in-process", exc)
         return False
 
