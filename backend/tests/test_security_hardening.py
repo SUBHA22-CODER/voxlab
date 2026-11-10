@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import pytest
+from sqlalchemy import select
 
 from app.core.security import create_access_token, decode_access_token_full
 
