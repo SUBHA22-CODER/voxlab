@@ -27,7 +27,7 @@ from app.speech.base import AudioData
 from app.speech.drift import compare_snapshots
 from app.speech.exceptions import SpeechError
 from app.speech.metrics import NormalizationConfig, compute_transcript_metrics
-from app.speech.runtime import artifact_store, get_engine
+from app.speech.runtime import get_engine
 
 logger = logging.getLogger(__name__)
 
