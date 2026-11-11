@@ -27,12 +27,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import av  # noqa: E402  (PyAV ships with faster-whisper)
-import numpy as np  # noqa: E402
+import av  # (PyAV ships with faster-whisper)
+import numpy as np
 
-from app.core.config import get_settings  # noqa: E402
-from app.speech.audio import load_audio, prepare_engine_audio  # noqa: E402
-from app.speech.metrics import NormalizationConfig, compute_transcript_metrics  # noqa: E402
+from app.core.config import get_settings
 
 # (case_id, archive.org item, file, attribution)
 CLIPS: list[tuple[str, str, str, str]] = [
@@ -122,7 +120,7 @@ def main() -> None:
     fixtures_dir.mkdir(parents=True, exist_ok=True)
 
     cases: list[dict[str, str]] = []
-    for case_id, item, file, attribution in CLIPS:
+    for case_id, item, file, _attribution in CLIPS:
         wav_path = fixtures_dir / f"{case_id}.wav"
         if not wav_path.exists():
             print(f"[human] downloading {case_id} from archive.org …")
