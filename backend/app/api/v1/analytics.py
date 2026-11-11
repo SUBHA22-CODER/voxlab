@@ -194,29 +194,48 @@ async def robustness_heatmap(
 # --- Phase 6: fixed benchmark datasets + drift snapshots -----------------------
 
 
+# Committed datasets shipped with the repo (available on fresh installs/CI
+# where the gitignored data/ directory does not exist).
+COMMITTED_DATASETS_DIR = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "datasets"
+
+
 def _dataset_dir(name: str) -> Path:
     if not name.replace("-", "").replace("_", "").isalnum():
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Dataset name must be alphanumeric (dashes/underscores allowed).",
         )
-    return Path(get_settings().audio_storage_dir) / "benchmarks" / name
+    storage_dir = Path(get_settings().audio_storage_dir) / "benchmarks" / name
+    if storage_dir.exists():
+        return storage_dir
+    committed = COMMITTED_DATASETS_DIR / name
+    if committed.exists():
+        return committed
+    return storage_dir  # caller reports the honest 404
 
 
 @router.get("/datasets")
 async def list_datasets(user: User = Depends(get_current_user)):
-    """Fixed benchmark datasets present on this machine (manifest-backed)."""
-    base = Path(get_settings().audio_storage_dir) / "benchmarks"
+    """Fixed benchmark datasets available (storage dir first, then the
+    committed fixtures shipped with the repo)."""
+    roots = [Path(get_settings().audio_storage_dir) / "benchmarks", COMMITTED_DATASETS_DIR]
     datasets: list[dict] = []
-    if base.exists():
+    seen: set[str] = set()
+    for base in roots:
+        if not base.exists():
+            continue
         for manifest_path in sorted(base.glob("*/manifest.json")):
+            name = manifest_path.parent.name
+            if name in seen:
+                continue
+            seen.add(name)
             try:
                 import json
 
                 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
                 datasets.append(
                     {
-                        "name": manifest_path.parent.name,
+                        "name": name,
                         "case_count": len(manifest.get("cases", [])),
                         "description": manifest.get("description", ""),
                     }
