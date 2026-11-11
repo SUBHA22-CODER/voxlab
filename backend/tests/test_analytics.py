@@ -209,3 +209,86 @@ class TestDriftAPI:
             "/api/v1/analytics/datasets/never-built/snapshot", headers=auth_headers
         )
         assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+class TestQualityGate:
+    @staticmethod
+    def _tone_wav(seconds: float = 0.5) -> bytes:
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(16000)
+            t = np.arange(int(seconds * 16000)) / 16000
+            w.writeframes((0.3 * np.sin(2 * np.pi * 300 * t) * 32767).astype("<i2").tobytes())
+        return buf.getvalue()
+
+    async def _seed_and_snapshot(self, client, auth_headers, monkeypatch, wers: list[float]):
+        from tests.test_api_v1_audio import StubAPIEngine
+
+        async def fake_get_engine(engine_id: str = "whisper_local"):
+            engine = StubAPIEngine()
+            engine._qa_wers = wers
+            return engine
+
+        import app.api.v1.analytics as analytics_mod
+        monkeypatch.setattr(analytics_mod, "get_engine", fake_get_engine)
+
+        # stub transcribe returns fixed text; override metrics by seeding results
+        response = await client.post(
+            "/api/v1/analytics/datasets/human-voices-v1/snapshot?engine_id=stub",
+            headers=auth_headers,
+        )
+        return response
+
+    async def test_gate_passes_when_no_regression(self, client, auth_headers, monkeypatch):
+        await self._seed_and_snapshot(client, auth_headers, monkeypatch, [0.1] * 4)
+        response = await client.post(
+            "/api/v1/analytics/quality-gate?name=human-voices-v1&engine_id=stub",
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["passed"] is True
+        # setup snapshot exists -> comparison present with zero delta
+        assert body["comparison"]["deltas"]["wer"] == 0.0
+
+    async def test_gate_fails_absolute_threshold(self, client, auth_headers, monkeypatch):
+        await self._seed_and_snapshot(client, auth_headers, monkeypatch, [0.1] * 4)
+        response = await client.post(
+            "/api/v1/analytics/quality-gate?name=human-voices-v1&engine_id=stub&max_mean_wer=0.05",
+            headers=auth_headers,
+        )
+        assert response.status_code == 422  # pipeline-blocker semantics
+        body = response.json()
+        assert body["passed"] is False
+        assert any("absolute" in r for r in body["reasons"])
+
+    async def test_first_snapshot_never_fails_relative_rule(self, client, auth_headers, monkeypatch):
+        # fresh dataset with no previous snapshot: absolute rule only
+        from app.core.config import get_settings
+        import json as _json
+        directory = Path(get_settings().audio_storage_dir) / "benchmarks" / "gate-ds"
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / "case-01.wav").write_bytes(self._tone_wav(0.5))
+        (directory / "manifest.json").write_text(_json.dumps(
+            {"name": "gate-ds", "cases": [{"id": "c1", "text": "hello world", "wav": "case-01.wav"}]}
+        ), encoding="utf-8")
+
+        from tests.test_api_v1_audio import StubAPIEngine
+
+        async def fake_get_engine(engine_id: str = "whisper_local"):
+            return StubAPIEngine()
+
+        import app.api.v1.analytics as analytics_mod
+        monkeypatch.setattr(analytics_mod, "get_engine", fake_get_engine)
+
+        response = await client.post(
+            "/api/v1/analytics/quality-gate?name=gate-ds&engine_id=stub&max_mean_wer=0.9",
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["comparison"] is None
+        assert body["passed"] is True

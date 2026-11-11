@@ -375,3 +375,84 @@ async def compare_drift(
         "current": _snapshot_out(current),
         **comparison.to_dict(),
     }
+
+
+@router.post("/quality-gate")
+async def quality_gate(
+    name: str,
+    engine_id: str = "whisper_local",
+    max_mean_wer: float | None = None,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """CI quality gate (VoxLab 2.6 wedge): evaluate the fixed dataset with the
+    current engine/model, compare against the LATEST previous snapshot, and
+    return an explicit pass/fail verdict suitable for pipeline blocking.
+
+    Fail conditions (any one):
+      - absolute: mean WER > max_mean_wer (when provided)
+      - relative: paired-bootstrap regression vs the previous snapshot
+        (CI lower bound > 0; snapshots with < MIN_PAIRS comparable cases
+        never fail on the relative rule)
+    Exit-code semantics: 200 = pass, 422 = gate failed (pipeline blocker).
+    """
+    previous = (
+        await db.scalars(
+            select(AudioDriftSnapshot)
+            .where(AudioDriftSnapshot.user_id == user.id)
+            .where(AudioDriftSnapshot.dataset_name == name)
+            .order_by(AudioDriftSnapshot.id.desc())
+            .limit(1)
+        )
+    ).first()
+
+    snapshot = await _run_dataset(db, user, name, engine_id)
+
+    verdict: dict[str, object] = {
+        "dataset": name,
+        "engine": snapshot.engine,
+        "model_version": snapshot.model_version,
+        "mean_wer": snapshot.mean_wer,
+        "mean_cer": snapshot.mean_cer,
+        "mean_rtf": snapshot.mean_rtf,
+        "snapshot_id": snapshot.id,
+        "checked_at": datetime.now(UTC).isoformat(),
+    }
+
+    failed = False
+    reasons: list[str] = []
+
+    if max_mean_wer is not None and snapshot.mean_wer > max_mean_wer:
+        failed = True
+        reasons.append(
+            f"absolute: mean WER {snapshot.mean_wer:.4f} exceeds gate "
+            f"{max_mean_wer:.4f}"
+        )
+
+    if previous is not None:
+        comparison = compare_snapshots(
+            previous.results or [],
+            snapshot.results or [],
+            baseline_id=previous.id,
+            current_id=snapshot.id,
+        )
+        verdict["comparison"] = comparison.to_dict()
+        if comparison.regression_detected:
+            failed = True
+            reasons.append(
+                f"relative: paired-bootstrap regression vs snapshot "
+                f"#{previous.id} (WER delta {comparison.mean_wer_delta}, "
+                f"CI low {comparison.wer_ci_low})"
+            )
+        verdict["gate_rule_relative"] = "fail only when CI lower bound > 0"
+    else:
+        verdict["comparison"] = None
+        verdict["note"] = "no previous snapshot: absolute rule only"
+
+    verdict["passed"] = not failed
+    verdict["reasons"] = reasons
+    if failed:
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(status_code=422, content=verdict)
+    return verdict
