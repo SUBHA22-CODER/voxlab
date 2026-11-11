@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     speech_vosk_model_dir: str = ""
     speech_vosk_auto_download: bool = False
 
+    # Third engine (Wav2Vec2-base): CTC acoustic model from Hugging Face.
+    # Default model: facebook/wav2vec2-base-960h (~380 MB).
+    speech_wav2vec2_model: str = "facebook/wav2vec2-base-960h"
+    speech_wav2vec2_revision: str = "main"
+    speech_wav2vec2_device: str = "cpu"
+    speech_wav2vec2_model_dir: str = ""
+    speech_wav2vec2_auto_download: bool = False
+    speech_wav2vec2_word_timestamps: bool = True
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

@@ -1,0 +1,12 @@
+# Optional third speech engine for VoxLab 2.5: Wav2Vec 2.0 (Meta AI / Hugging Face).
+# Self-supervised acoustic representations with a non-autoregressive CTC head.
+#   pip install -r requirements-speech-wav2vec2.txt
+#
+# Default model: facebook/wav2vec2-base-960h (~380 MB).
+# Note: PyTorch is a heavy install (~2 GB on CPU/CUDA). The platform runs fully
+# without this file (reported as not installed until this extra is present).
+
+torch>=2.0.0
+transformers>=4.30.0
+soundfile>=0.12.0
+

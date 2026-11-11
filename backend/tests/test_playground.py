@@ -65,6 +65,7 @@ class TestPlaygroundWebSocket:
 
         monkeypatch.setattr("app.main.init_db", _noop)
         monkeypatch.setattr("app.main.load_builtin_scenarios", _noop)
+        monkeypatch.setattr("app.main.ensure_demo_user", _noop)
         with TestClient(app) as tc:
             # VoxLab 2.5: token must arrive via Sec-WebSocket-Protocol; a
             # malformed subprotocol list is rejected (and never appears in
