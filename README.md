@@ -50,6 +50,34 @@ Docs: [Audio Engine](docs/AUDIO_ENGINE_GUIDE.md) ·
 [Benchmarks](docs/BENCHMARKING.md) ·
 [Implementation Report](docs/FINAL_IMPLEMENTATION_REPORT.md)
 
+
+### 🎙️ Real human voices — three architectures, one reference (Nov 2025)
+
+Run on **real public-domain human voices** (four LibriVox narrators, US + UK,
+male + female, real rooms): identical reference text (the standard LibriVox
+disclaimer), three fundamentally different architectures.
+
+| Engine (architecture) | Mean WER | Per-narrator highlights |
+|---|---|---|
+| **Wav2Vec2** (self-supervised CTC) | **52.2%** | Most robust overall; even recovered the preface preamble |
+| **Whisper** (encoder-decoder, base) | 57.6% | Best single clip (Jane Eyre narrator, WER 0.17) — but hallucinated a repetition loop on a quiet clip |
+| **Vosk** (Kaldi HMM-DNN) | 71.7% | Collapsed on two narrators ("i would guess why") |
+
+The headline finding: **the ranking flips versus synthetic speech** — Whisper
+won on TTS fixtures (WER 3.5%) but Wav2Vec2 wins on real human voices. That
+interaction between voice style and architecture is exactly what VoxLab
+exists to measure. One clip also triggered a genuine Whisper hallucination
+loop ("This is your first time. This is your first time…") on real audio —
+the precise failure class the platform hunts, caught live.
+
+Fixtures are committed under `backend/tests/fixtures/human_voices/` with
+full attribution (LibriVox, public domain). Reproduce:
+
+```bash
+cd backend
+python scripts/build_human_voice_benchmark.py   # rebuild fixtures + manifest
+```
+
 ---
 
 ## 💡 Overview

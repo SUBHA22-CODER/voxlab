@@ -1,0 +1,109 @@
+{
+  "whisper_local": {
+    "mean_wer": 0.5761,
+    "wall_s": 11.4,
+    "rows": [
+      {
+        "case": "expressman-male-us",
+        "wer": 1.0,
+        "cer": 0.8571,
+        "rtf": 0.6133,
+        "text": "Professor, Professor, Professor"
+      },
+      {
+        "case": "janeeyre-female-uk",
+        "wer": 0.1739,
+        "cer": 0.05,
+        "rtf": 0.1332,
+        "text": "This is a Librevox recording. All Librevox recordings are in the public domain. For more information or to volunteer, please visit Librevox."
+      },
+      {
+        "case": "tomsawyer-male-us-2",
+        "wer": 1.0,
+        "cer": 0.7429,
+        "rtf": 0.1214,
+        "text": "The adventures of Tom Sawyer are in last week. This isn't the last recording. All the recordings are in the public domain. Tomorrow."
+      },
+      {
+        "case": "prideprejudice-female-uk-2",
+        "wer": 0.1304,
+        "cer": 0.0429,
+        "rtf": 0.1144,
+        "text": "This is a Librebox recording. All Librebox recordings are in the public domain. For more information or to volunteer, please visit Librebox.org."
+      }
+    ]
+  },
+  "vosk": {
+    "mean_wer": 0.7174,
+    "wall_s": 10.9,
+    "rows": [
+      {
+        "case": "expressman-male-us",
+        "wer": 1.0,
+        "cer": 0.9714,
+        "rtf": 0.1816,
+        "text": "good"
+      },
+      {
+        "case": "janeeyre-female-uk",
+        "wer": 0.2609,
+        "cer": 0.1571,
+        "rtf": 0.2161,
+        "text": "this is a leper vox recording all the provokes recordings are in the public domain for more information or to volunteer please visit liberal"
+      },
+      {
+        "case": "tomsawyer-male-us-2",
+        "wer": 1.0,
+        "cer": 0.9143,
+        "rtf": 0.1755,
+        "text": "i would guess why"
+      },
+      {
+        "case": "prideprejudice-female-uk-2",
+        "wer": 0.6087,
+        "cer": 0.5357,
+        "rtf": 0.3754,
+        "text": "it's all the parties are in the public domain more information about a year the about that"
+      }
+    ]
+  },
+  "wav2vec2": {
+    "mean_wer": 0.5217,
+    "wall_s": 6.7,
+    "rows": [
+      {
+        "case": "expressman-male-us",
+        "wer": 0.6957,
+        "cer": 0.7071,
+        "rtf": 0.1581,
+        "text": "PREFACE TO THE EXPRESSMAN AND THE DETECTIVE THIS IS A LIBRIVO RECORDING ALL LIBRIVOX RECORDINGS ARE IN THE PUBLIC DOMAIN FOR MORE"
+      },
+      {
+        "case": "janeeyre-female-uk",
+        "wer": 0.1739,
+        "cer": 0.0714,
+        "rtf": 0.1238,
+        "text": "THIS IS A LIBRIVOX RECORDING ALL LE BRIVOX RECORDINGS ARE IN THE PUBLIC DOMAIN FOR MORE INFORMATION OR TO VOLUNTEER PLEASE VISIT LIBRA"
+      },
+      {
+        "case": "tomsawyer-male-us-2",
+        "wer": 1.0,
+        "cer": 0.7929,
+        "rtf": 0.1403,
+        "text": "THE ADVENTURES OF TOM SAWYER BY MAR TWAIN THES IS THE THE BREVARX RECORDING ALL THE REVARKS RECORDINGS ARE IN THE PUBLIC DOMAIN FROMRIN"
+      },
+      {
+        "case": "prideprejudice-female-uk-2",
+        "wer": 0.2174,
+        "cer": 0.0857,
+        "rtf": 0.1564,
+        "text": "THIS IS A LIBREVAX RECORDING ALL LIBRVAX RECORDINGS ARE IN THE PUBLIC DOMAIN FOR MORE INFORMATION OR TO VOLUNTEER PLEASE VISIT LIBREVAX THAT OR"
+      }
+    ]
+  },
+  "stress_case": {
+    "engine": "whisper_local",
+    "clip": "expressman-pathological-16s",
+    "text": "This is your first time. This is your first time. Your first time. Your first time. This is..."
+  }
+}
