@@ -31,6 +31,7 @@ import av  # (PyAV ships with faster-whisper)
 import numpy as np
 
 from app.core.config import get_settings
+from app.speech.audio import load_audio, prepare_engine_audio
 
 # (case_id, archive.org item, file, attribution)
 CLIPS: list[tuple[str, str, str, str]] = [
