@@ -7,9 +7,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110-teal.svg)](https://fastapi.tiangolo.com)
+[![CI](https://img.shields.io/github/actions/workflow/status/SUBHA22-CODER/voxlab/ci.yml?label=CI)](https://github.com/SUBHA22-CODER/voxlab/actions/workflows/ci.yml)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.4.3-black.svg)](https://nextjs.org)
-[![Pytest](https://img.shields.io/badge/Pytest-191%20Passed-emerald.svg)](backend/tests/)
+[![Pytest](https://img.shields.io/badge/Pytest-254%20Passed-emerald.svg)](backend/tests/)
 [![Tailored for Wispr Flow](https://img.shields.io/badge/Tailored%20for-Wispr%20Flow-6366f1.svg)](https://wisprflow.ai)
 [![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)
 
@@ -19,37 +19,47 @@
 
 ---
 
-## 🚢 VoxLab 2.0 — Real Audio Reliability Lab
+## 🚢 VoxLab 2.5 — Three Engines, Semantic Intelligence, Drift Tracking
 
-VoxLab now tests the **speech layer itself**. A modular speech-engine stack
-(`backend/app/speech/`) integrates [whisper-local](https://github.com/drajb/whisper-local)
-(MIT, attribution retained) as the first real speech recognition engine, and
-Darwin evolves **adversarial audio** against it:
+VoxLab tests the **speech layer itself**. A modular engine stack
+(`backend/app/speech/`) integrates three fundamentally different speech
+recognition architectures and evolves **adversarial audio** against them:
 
-- **Audio Lab** — upload real audio, transcribe through a real engine, score
-  against a reference with honest WER/CER/number/entity/latency metrics.
-- **Darwin Audio Lab** — 10 attack personas and 14 seeded audio
-  transformations (noise, typing, tape-speed, telephony bandpass, dropouts,
-  content mutations via offline TTS) evolve failing audio; every discovery
-  is minimized to the smallest reproducible transformation chain.
-- **Benchmarks** — identical audio through every installed engine, compared
-  under identical conditions.
-- **Regression Corpus** — persistent, replayable failure cases with
-  fixed / improved / still-failing classification.
+- **Three real engines** — Whisper (encoder-decoder, via
+  [whisper-local](https://github.com/drajb/whisper-local), MIT), Vosk
+  (Kaldi HMM-DNN), and Wav2Vec2 (self-supervised CTC) — each an
+  independent adapter with honest install/capability reporting.
+- **Audio Lab** — upload real audio, transcribe, score against a reference:
+  WER/CER, number/entity/vocabulary accuracy, word-level error
+  localization, and deterministic semantic-error analysis (numbers, dates,
+  negations, entities, missing instructions, intent changes).
+- **Darwin Audio Lab** — 10 attack personas + 14 seeded audio transforms
+  evolve failing audio; every discovery is minimized (ddmin) to the
+  smallest reproducible transformation chain.
+- **Benchmarks & drift** — identical audio through every installed engine;
+  fixed datasets with paired-bootstrap drift detection that refuses to
+  claim significance on small samples.
+- **Robustness heatmap** — failure rates by noise level, speaking speed,
+  duration, and persona, aggregated from real findings.
+- **Security** — JWT with jti revocation, WebSocket subprotocol auth,
+  path-scoped rate limits, audit trail, audio retention sweeps, Alembic
+  migrations.
 
-Real evidence from one demo run (whisper-tiny, CPU, 17 s):
-`"order forty two"` → `"440Q"`, `"kubernetes deployment"` → `"boyless 440Q"`
-(WER 0.60), chain minimized 4 → 3 transforms with the failure reproduced.
+Enable the speech stacks (all optional — the platform reports uninstalled
+engines honestly):
+```bash
+pip install -r requirements-speech.txt            # Whisper
+pip install -r requirements-speech-vosk.txt       # Vosk
+pip install -r requirements-speech-wav2vec2.txt   # Wav2Vec2 (torch)
+```
 
-Enable the speech stack: `pip install -r requirements-speech.txt` (fully
-optional; the platform runs and reports engines as not installed without it).
 Docs: [Audio Engine](docs/AUDIO_ENGINE_GUIDE.md) ·
 [Darwin Audio](docs/DARWIN_AUDIO_ENGINE.md) ·
 [Metrics](docs/EVALUATION_METRICS.md) ·
 [Regressions](docs/REGRESSION_TESTING.md) ·
 [Benchmarks](docs/BENCHMARKING.md) ·
-[Implementation Report](docs/FINAL_IMPLEMENTATION_REPORT.md)
-
+[2.5 Report](docs/VOXLAB_2_5_IMPLEMENTATION_REPORT.md) ·
+[2.0 Report](docs/FINAL_IMPLEMENTATION_REPORT.md)
 
 ### 🎙️ Real human voices — three architectures, one reference (Nov 2025)
 
@@ -286,6 +296,11 @@ flowchart TD
 | **Root-Cause Diagnoser** | Automated defect classification with system prompt patch proposals. | ✅ Implemented |
 | **CI Regression Library** | 1-click export of discovered bugs into standard JSON test scenarios for CI gates. | ✅ Implemented |
 | **Deterministic Fallbacks** | Offline local heuristic NLP evaluators (100% functional with zero paid cloud API keys). | ✅ Implemented |
+| **Three Real STT Engines** | Whisper (encoder-decoder) + Vosk (Kaldi) + Wav2Vec2 (CTC) — modular adapters, honest capability reporting. | ✅ Implemented |
+| **WER/CER + Semantic Analysis** | Word-level error localization, deterministic semantic-error detection (numbers, dates, negations, intent). | ✅ Implemented |
+| **Robustness Heatmap** | Failure rates by noise, speed, duration, and persona from real findings. | ✅ Implemented |
+| **Model Drift Detection** | Fixed datasets, immutable snapshots, paired-bootstrap CI — no false alerts on small samples. | ✅ Implemented |
+| **Security Hardening** | JWT jti revocation, WebSocket subprotocol auth, rate limits, audit trail, audio retention, Alembic migrations. | ✅ Implemented |
 | **Raw PCM Audio Streaming** | Direct binary PCM16 chunk streaming over WebSockets. | 🟡 Partially Implemented |
 | **Distributed Celery Workers**| Multi-tenant distributed worker queues for horizontal scaling. | 📋 Planned |
 
