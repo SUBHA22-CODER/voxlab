@@ -19,3 +19,4 @@ pytest-asyncio>=0.23
 python-multipart>=0.0.9
 arq>=0.25  # only imported when REDIS_URL is set (workers/runner.py)
 alembic>=1.13
+numpy>=1.24.0  # core audio-layer dependency (engine runtimes remain optional extras)
