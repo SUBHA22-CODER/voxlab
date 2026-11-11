@@ -9,11 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models import User
-from app.schemas.audio import EngineHealthOut, EngineOut, TranscriptionOut
+from app.schemas.audio import (
+    EngineHealthOut,
+    EngineOut,
+    ScoreRequest,
+    ScoreResponse,
+    TranscriptionOut,
+)
 from app.speech.base import SpeechEngine
 from app.speech.exceptions import SpeechError
 from app.speech.alignment import WordTiming, align_words
-from app.speech.metrics import compute_transcript_metrics
+from app.speech.metrics import NormalizationConfig, compute_transcript_metrics
 from app.speech.semantic import analyze_semantic_errors
 from app.speech.semantic_llm import judge_semantics_with_llm
 from app.services.llm import LLMService
@@ -121,4 +127,46 @@ async def transcribe_audio(
         alignment=alignment_payload,
         semantic=semantic_payload,
         llm_judgment=llm_payload,
+    )
+
+
+@router.post("/audio/score", response_model=ScoreResponse)
+async def score_transcript(
+    body: ScoreRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Score a transcript from any text source against a reference.
+
+    Built for human-in-the-loop benchmarking: dictate into your product
+    (e.g. Wispr Flow types into the Audio Lab capture box), paste the
+    result, and VoxLab scores it through the SAME deterministic metric,
+    alignment, and semantic layers used for the engine leaderboard.
+    The advisory LLM layer runs only when a key is configured AND
+    use_llm_judge was enabled client-side (omitted here by default).
+    """
+    from datetime import UTC, datetime
+
+    metrics = compute_transcript_metrics(
+        body.reference,
+        body.hypothesis,
+        entities=body.entities or None,
+        technical_vocab=body.technical_vocab or None,
+        normalization=NormalizationConfig(expand_numbers=True),
+    ).to_dict()
+    alignment = align_words(body.reference, body.hypothesis).to_dict()
+    semantic = analyze_semantic_errors(
+        body.reference,
+        body.hypothesis,
+        entities=body.entities or None,
+        technical_vocab=body.technical_vocab or None,
+    ).to_dict()
+    return ScoreResponse(
+        label=body.label or f"manual-{datetime.now(UTC).strftime('%H%M%S')}",
+        source="human_in_the_loop",
+        reference=body.reference,
+        hypothesis=body.hypothesis,
+        metrics=metrics,
+        alignment=alignment,
+        semantic=semantic,
     )

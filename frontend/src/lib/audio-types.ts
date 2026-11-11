@@ -297,3 +297,14 @@ export interface AudioBenchmark {
   audio_ref: string;
   created_at: string;
 }
+
+export interface ManualScoreView {
+  label: string;
+  source: string;
+  reference: string;
+  hypothesis: string;
+  metrics: TranscriptMetricsReport;
+  alignment: AlignmentView;
+  semantic: SemanticAnalysisView;
+  llm_judgment: LLMJudgmentView | null;
+}

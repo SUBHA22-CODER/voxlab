@@ -131,3 +131,25 @@ class BenchmarkOut(BaseModel):
     reference_transcript: str
     audio_ref: str
     created_at: datetime
+
+
+class ScoreRequest(BaseModel):
+    """Score a transcript from ANY text-producing source (human dictation via
+    Wispr Flow, another product's output, a manual paste). No audio required."""
+
+    reference: str = Field(min_length=1)
+    hypothesis: str
+    label: str = ""
+    entities: list[str] = Field(default_factory=list)
+    technical_vocab: list[str] = Field(default_factory=list)
+
+
+class ScoreResponse(BaseModel):
+    label: str
+    source: str
+    reference: str
+    hypothesis: str
+    metrics: dict[str, Any]
+    alignment: dict[str, Any]
+    semantic: dict[str, Any]
+    llm_judgment: dict[str, Any] | None = None

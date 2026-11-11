@@ -314,3 +314,38 @@ async def test_transcribe_with_reference_returns_alignment_and_semantic(
     assert "meaning_preserved" in body["semantic"]
     # The advisory LLM layer is opt-in: absent unless explicitly requested.
     assert body["llm_judgment"] is None
+
+
+@pytest.mark.asyncio
+async def test_score_transcript_wispr_flow_style(client, auth_headers):
+    """Human-in-the-loop scoring: text in, full honest report out — no audio."""
+    response = await client.post(
+        "/api/v1/audio/score",
+        headers=auth_headers,
+        json={
+            "reference": "Schedule the kubernetes deployment for order 42",
+            "hypothesis": "Schedule the cavirnetts demployment for order forty two",
+            "label": "wispr-flow-pro-capture",
+            "entities": ["kubernetes"],
+            "technical_vocab": ["kubernetes", "deployment"],
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["source"] == "human_in_the_loop"
+    gt = body["metrics"]["ground_truth"]
+    assert gt["wer"] > 0  # "cavirnetts demployment" garbled
+    assert gt["number_accuracy"] == 1.0  # "42" == "forty two" (expand_numbers)
+    assert body["alignment"]["counts"]["substitutions"] >= 1
+    assert body["semantic"]["meaning_preserved"] is False
+    assert any(e["type"] == "terminology_error" for e in body["semantic"]["errors"])
+
+    assert response.status_code != 500
+
+
+@pytest.mark.asyncio
+async def test_score_transcript_requires_reference(client, auth_headers):
+    response = await client.post(
+        "/api/v1/audio/score", headers=auth_headers, json={"reference": "", "hypothesis": "x"}
+    )
+    assert response.status_code == 422

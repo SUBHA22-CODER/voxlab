@@ -6,6 +6,8 @@ import { Waveform, UploadSimple, Play, ArrowsLeftRight } from "@phosphor-icons/r
 import { AudioEngines, AudioTranscribe } from "@/lib/audio-api";
 import type { EngineInfo, TranscriptionResult } from "@/lib/audio-types";
 import { AudioMetricBars } from "@/components/audio/metric-bars";
+import { AudioScoring } from "@/lib/audio-api";
+import type { ManualScoreView } from "@/lib/audio-types";
 import { WordDiff } from "@/components/audio/word-diff";
 import type { SemanticErrorView } from "@/lib/audio-types";
 import {
@@ -41,6 +43,10 @@ export default function AudioLabPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [mode, setMode] = useState<"transcribe" | "wispr">("transcribe");
+  const [wisprHypothesis, setWisprHypothesis] = useState("");
+  const [wisprResult, setWisprResult] = useState<ManualScoreView | null>(null);
+  const [wisprBusy, setWisprBusy] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -61,6 +67,26 @@ export default function AudioLabPage() {
     }
     setFile(next);
     setResult(null);
+  }
+
+  async function scoreWispr() {
+    if (!reference.trim() || !wisprHypothesis.trim()) return;
+    setWisprBusy(true);
+    setError(null);
+    try {
+      const response = await AudioScoring.score({
+        reference,
+        hypothesis: wisprHypothesis,
+        label: "wispr-flow-pro",
+        entities: entities ? entities.split(",").map((e) => e.trim()).filter(Boolean) : undefined,
+        technical_vocab: technicalVocab ? technicalVocab.split(",").map((v) => v.trim()).filter(Boolean) : undefined,
+      });
+      setWisprResult(response);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Scoring failed");
+    } finally {
+      setWisprBusy(false);
+    }
   }
 
   async function run() {
@@ -93,8 +119,61 @@ export default function AudioLabPage() {
         subtitle="Transcribe real audio through real speech engines and measure accuracy against a reference transcript."
       />
 
+      <div className="mb-4 inline-flex rounded-lg border border-zinc-800 bg-zinc-900/60 p-1" role="tablist" aria-label="Input mode">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "transcribe"}
+          onClick={() => setMode("transcribe")}
+          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${mode === "transcribe" ? "bg-emerald-500/15 text-emerald-300" : "text-zinc-400 hover:text-zinc-200"}`}
+        >
+          Audio transcription
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "wispr"}
+          onClick={() => setMode("wispr")}
+          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${mode === "wispr" ? "bg-emerald-500/15 text-emerald-300" : "text-zinc-400 hover:text-zinc-200"}`}
+        >
+          Wispr Flow capture
+        </button>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[400px_1fr]">
         <div className="space-y-5">
+          {mode === "wispr" && (
+          <Card>
+            <CardHeader>Wispr Flow capture</CardHeader>
+            <CardBody className="space-y-3">
+              <ol className="list-inside list-decimal space-y-1 text-xs leading-relaxed text-zinc-400">
+                <li>Type the reference text into the field below.</li>
+                <li>Focus the capture box and dictate it with Wispr Flow (Pro) — it types at your cursor.</li>
+                <li>Score it: the same WER / word-level / semantic layers as the engine leaderboard.</li>
+              </ol>
+              <div>
+                <Label htmlFor="wispr-hypothesis">Wispr Flow output</Label>
+                <textarea
+                  id="wispr-hypothesis"
+                  rows={4}
+                  value={wisprHypothesis}
+                  onChange={(e) => setWisprHypothesis(e.target.value)}
+                  placeholder="Focus here and dictate with Wispr Flow…"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                />
+              </div>
+              <Button onClick={scoreWispr} disabled={!reference.trim() || !wisprHypothesis.trim() || wisprBusy} className="w-full">
+                {wisprBusy ? "Scoring…" : "Score Wispr Flow output"}
+              </Button>
+              <p className="text-[10px] leading-snug text-zinc-600">
+                Human-in-the-loop benchmarking: your Pro dictation output is scored through the same
+                deterministic metric layer as the engines. Nothing leaves your machine.
+              </p>
+            </CardBody>
+          </Card>
+          )}
+
+          {mode === "transcribe" && (
           <Card>
             <CardHeader>Audio clip</CardHeader>
             <CardBody>
@@ -146,7 +225,9 @@ export default function AudioLabPage() {
               </div>
             </CardBody>
           </Card>
+          )}
 
+          {mode === "transcribe" && (
           <Card>
             <CardHeader>Engine</CardHeader>
             <CardBody className="space-y-3">
@@ -178,9 +259,10 @@ export default function AudioLabPage() {
               </div>
             </CardBody>
           </Card>
+          )}
 
           <Card>
-            <CardHeader>Reference transcript (optional)</CardHeader>
+            <CardHeader>{mode === "wispr" ? "Reference text" : "Reference transcript (optional)"}</CardHeader>
             <CardBody className="space-y-3">
               <div>
                 <Label htmlFor="reference-input">What the audio should say</Label>
@@ -227,7 +309,7 @@ export default function AudioLabPage() {
         </div>
 
         <div className="space-y-5">
-          {!result && !busy && (
+          {mode === "transcribe" && !result && !busy && (
             <Card>
               <EmptyState
                 icon={<Waveform className="h-6 w-6" aria-hidden />}
@@ -237,7 +319,7 @@ export default function AudioLabPage() {
             </Card>
           )}
 
-          {busy && (
+          {mode === "transcribe" && busy && (
             <Card>
               <CardBody className="space-y-3">
                 <div className="h-4 w-40 animate-pulse rounded bg-zinc-800" />
@@ -248,7 +330,7 @@ export default function AudioLabPage() {
             </Card>
           )}
 
-          {result && (
+          {mode === "transcribe" && result && (
             <>
               <Card>
                 <CardHeader
@@ -354,6 +436,89 @@ export default function AudioLabPage() {
                     <AudioMetricBars metrics={result.metrics} />
                   </CardBody>
                 </Card>
+              )}
+            </>
+          )}
+
+          {mode === "wispr" && (
+            <>
+              {!wisprResult && !wisprBusy && (
+                <Card>
+                  <EmptyState
+                    icon={<Waveform className="h-6 w-6" aria-hidden />}
+                    title="No Wispr Flow capture scored yet"
+                    hint="Enter the reference text, dictate it with Wispr Flow into the capture box, then score. Output is measured with the exact same metric layer as the engines."
+                  />
+                </Card>
+              )}
+              {wisprBusy && (
+                <Card>
+                  <CardBody className="space-y-3">
+                    <div className="h-4 w-40 animate-pulse rounded bg-zinc-800" />
+                    <div className="h-3 w-full animate-pulse rounded bg-zinc-800/70" />
+                    <div className="h-3 w-3/5 animate-pulse rounded bg-zinc-800/70" />
+                  </CardBody>
+                </Card>
+              )}
+              {wisprResult && (
+                <>
+                  <Card>
+                    <CardHeader
+                      right={<Badge tone="green">{wisprResult.label || "wispr-flow-pro"}</Badge>}
+                    >
+                      Wispr Flow dictation
+                    </CardHeader>
+                    <CardBody>
+                      <p className="text-[15px] leading-relaxed text-zinc-100">{wisprResult.hypothesis}</p>
+                      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[11px] text-zinc-500">
+                        <span>vs {wisprResult.reference.slice(0, 60)}{wisprResult.reference.length > 60 ? "…" : ""}</span>
+                      </div>
+                    </CardBody>
+                  </Card>
+
+                  {wisprResult.semantic.errors.length > 0 && (
+                    <Card>
+                      <CardHeader
+                        right={
+                          <Badge tone={wisprResult.semantic.meaning_preserved ? "green" : "red"}>
+                            {wisprResult.semantic.meaning_preserved ? "meaning preserved" : "meaning changed"}
+                          </Badge>
+                        }
+                      >
+                        Semantic error analysis
+                      </CardHeader>
+                      <CardBody className="space-y-2">
+                        {wisprResult.semantic.errors.map((err, i) => (
+                          <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-mono text-[11px] text-zinc-400">{err.type.replace(/_/g, " ")}</span>
+                              <Badge tone={err.severity === "critical" ? "red" : err.severity === "major" ? "amber" : "zinc"}>
+                                {err.severity}
+                              </Badge>
+                            </div>
+                            <p className="mt-1 text-xs leading-relaxed text-zinc-400">{err.description}</p>
+                          </div>
+                        ))}
+                      </CardBody>
+                    </Card>
+                  )}
+
+                  {wisprResult.alignment && (
+                    <Card>
+                      <CardHeader>Word-level comparison</CardHeader>
+                      <CardBody>
+                        <WordDiff alignment={wisprResult.alignment} />
+                      </CardBody>
+                    </Card>
+                  )}
+
+                  <Card>
+                    <CardHeader>Accuracy metrics</CardHeader>
+                    <CardBody>
+                      <AudioMetricBars metrics={wisprResult.metrics} />
+                    </CardBody>
+                  </Card>
+                </>
               )}
             </>
           )}

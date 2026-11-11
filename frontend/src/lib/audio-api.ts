@@ -7,6 +7,7 @@
 import { API_URL, ApiError, getToken } from "./api";
 import type {
   AudioBenchmark,
+  ManualScoreView,
   DatasetInfo,
   DriftComparisonView,
   DriftSnapshotView,
@@ -153,6 +154,16 @@ export const Benchmarks = {
 };
 
 export type { BenchmarkEngineResult };
+
+export const AudioScoring = {
+  score: (body: {
+    reference: string;
+    hypothesis: string;
+    label?: string;
+    entities?: string[];
+    technical_vocab?: string[];
+  }) => fetchJson<ManualScoreView>("/api/v1/audio/score", { method: "POST", body: JSON.stringify(body) }),
+};
 
 export const Analytics = {
   robustness: () => fetchJson<RobustnessReport>("/api/v1/analytics/robustness"),
