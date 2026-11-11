@@ -21,13 +21,16 @@
 
 ## 🚢 VoxLab 2.5 — Three Engines, Semantic Intelligence, Drift Tracking
 
+> **Three fundamentally different speech architectures, one adversarial engine, per-engine failure signatures in one heatmap.**
+
 VoxLab tests the **speech layer itself**. A modular engine stack
 (`backend/app/speech/`) integrates three fundamentally different speech
 recognition architectures and evolves **adversarial audio** against them:
 
-- **Three real engines** — Whisper (encoder-decoder, via
+- **Three real engines** — Whisper (encoder-decoder autoregressive transformer, via
   [whisper-local](https://github.com/drajb/whisper-local), MIT), Vosk
-  (Kaldi HMM-DNN), and Wav2Vec2 (self-supervised CTC) — each an
+  (Kaldi HMM-DNN hybrid WFST decoder), and Wav2Vec2
+  (self-supervised acoustic representation with non-autoregressive CTC head, via Hugging Face) — each an
   independent adapter with honest install/capability reporting.
 - **Audio Lab** — upload real audio, transcribe, score against a reference:
   WER/CER, number/entity/vocabulary accuracy, word-level error
@@ -377,10 +380,10 @@ Configuration is managed via environment variables. See [docs/CONFIGURATION.md](
 
 ## 🧪 Testing & Verification
 
-VoxLab maintains rigorous automated testing across backend APIs, evaluation logic, and Darwin mutation routines:
+VoxLab maintains rigorous automated testing across backend APIs, evaluation logic, speech adapters, and Darwin mutation routines:
 
 ```bash
-# Run Backend Pytest Suite (109 tests)
+# Run Backend Pytest Suite (254+ tests)
 cd backend
 python -m pytest tests -v
 
@@ -389,12 +392,13 @@ cd frontend
 npm run build
 ```
 
-**Test Results:**
-* `backend/tests/test_api_e2e.py` (52 tests passed)
-* `backend/tests/test_evaluation.py` (35 tests passed)
-* `backend/tests/test_darwin.py` (14 tests passed)
-* `backend/tests/test_darwin_integration.py` (8 tests passed)
-* **Total:** **109 passed** in 10.07s (100% pass rate).
+**Test Coverage Highlights:**
+* `backend/tests/test_api_e2e.py` & `test_api_v1_audio.py` (API surface, streaming, and audio endpoints)
+* `backend/tests/test_darwin*.py` (evolutionary genome, mutations, ddmin minimization, audio transforms)
+* `backend/tests/test_wav2vec2_adapter.py` & `test_vosk_integration.py` (multi-engine STT adapters & CTC offsets)
+* `backend/tests/test_analytics.py` & `test_semantic_alignment.py` (robustness heatmaps & word-level error localization)
+* `backend/tests/test_security_hardening.py` & `test_migrations.py` (auth, rate-limiting, and Alembic migrations)
+* **Total:** **254+ passed** with 100% pass rate.
 
 ---
 
