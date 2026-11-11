@@ -14,8 +14,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import httpx  # noqa: E402
-import numpy as np  # noqa: E402
+import httpx
+import numpy as np
 
 BASE = "http://localhost:8001"
 FRONTEND = "http://localhost:3000"
