@@ -359,7 +359,7 @@ npm run dev
 
 ### 4. Explore with One Click
 1. Open **[http://localhost:3000](http://localhost:3000)**.
-2. Click **"Explore with Demo Account"** (or log in with `demo@voxlab.dev` / `demo123`).
+2. Click **"Explore with Demo Account"** (or log in with `demo@voxlab.dev` / `demo1234`).
 3. Both demo agents are pre-registered and ready for testing in Playground and Darwin.
 
 ---

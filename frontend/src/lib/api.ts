@@ -53,7 +53,9 @@ export async function api<T>(
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const response = await fetch(`${API_URL}${path}`, { ...options, headers });
-  if (response.status === 401 && typeof window !== "undefined") {
+  const isAuthEndpoint =
+    path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register");
+  if (response.status === 401 && typeof window !== "undefined" && !isAuthEndpoint) {
     setToken(null);
     window.location.href = "/register";
     throw new ApiError("Session expired", 401);

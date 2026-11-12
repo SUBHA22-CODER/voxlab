@@ -64,11 +64,7 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      try {
-        await login("demo@voxlab.dev", "demo123");
-      } catch {
-        await login("demo@voxlab.dev", "demo1234");
-      }
+      await login("demo@voxlab.dev", "demo1234");
       router.replace("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Demo sign in failed");
