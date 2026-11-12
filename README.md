@@ -9,11 +9,12 @@
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![CI](https://img.shields.io/github/actions/workflow/status/SUBHA22-CODER/voxlab/ci.yml?label=CI)](https://github.com/SUBHA22-CODER/voxlab/actions/workflows/ci.yml)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.4.3-black.svg)](https://nextjs.org)
-[![Pytest](https://img.shields.io/badge/Pytest-254%20Passed-emerald.svg)](backend/tests/)
+[![Pytest](https://img.shields.io/badge/Pytest-267%20Passed-emerald.svg)](backend/tests/)
 [![Tailored for Wispr Flow](https://img.shields.io/badge/Tailored%20for-Wispr%20Flow-6366f1.svg)](https://wisprflow.ai)
+[![Gnani AI Integration](https://img.shields.io/badge/Provider-Gnani%20AI%20(Prisma%20%2B%20Timbre)-emerald.svg)](https://docs.gnani.ai/)
 [![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)
 
-[Documentation](docs/) • [PRD](docs/PRD.md) • [Plan](docs/PLAN.md) • [Architecture](docs/architecture.md) • [Darwin Engine](docs/DARWIN_ENGINE.md) • [API Reference](https://voxlab-2.onrender.com/docs) • [Contributing](CONTRIBUTING.md)
+[Documentation](docs/) • [PRD](docs/PRD.md) • [Plan](docs/PLAN.md) • [Architecture](docs/architecture.md) • [Darwin Engine](docs/DARWIN_ENGINE.md) • [Gnani Integration](docs/GNANI_INTEGRATION.md) • [Indic Speech Lab](docs/INDIC_SPEECH_LAB.md) • [API Reference](https://voxlab-2.onrender.com/docs) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -90,6 +91,32 @@ full attribution (LibriVox, public domain). Reproduce:
 cd backend
 python scripts/build_human_voice_benchmark.py   # rebuild fixtures + manifest
 ```
+
+---
+
+## 🇮🇳 Gnani AI Integration & Indic Speech Lab
+
+> **Enterprise Indic multilingual voice infrastructure covering 12+ Indian languages, code-switching dialects, and dual-layer reliability benchmarking.**
+
+VoxLab natively integrates official [Gnani AI](https://docs.gnani.ai/) Vachana APIs alongside Wispr Flow without architectural conflict:
+
+- **Prisma Speech-to-Text (v2.5 / v3.0)** — High-accuracy Indic ASR across Hindi, Bengali, Tamil, Telugu, Kannada, Marathi, Gujarati, Malayalam, Odia, Punjabi, and Indian English, with auto language detection (`indic-auto`).
+- **Timbre Text-to-Speech (v2.5 / v3.0)** — Neural expressive voice generation featuring multi-accent regional speakers (Nalini, Arjun, Kavitha, Ananya, Sravani, Rohan).
+- **Indic Speech Lab (`/indic`)** — Dual-layer verbatim vs. normalized reliability scoring. Standard Western WER penalizes Indic models unfairly for script variations (Devanagari numerals, Dandas, Unicode NFC); VoxLab computes both raw and normalized metrics.
+- **Code-Switching Support** — Automated detection and benchmarking for Hinglish, Benglish, and Tanglish conversational voice patterns with English loanword retention tracking.
+- **12 New Darwin Personas** — Adversarial mutators simulating Hinglish switching, regional accent drift, background acoustic pressure, fast/slow speech, and phonetic proper-noun confusion.
+- **Provider Dashboard (`/providers`)** — Unified view monitoring status, health, and capabilities across Wispr Flow, Gnani AI, and local engines (Whisper, Vosk, Wav2Vec2).
+
+Configure Gnani in `backend/.env`:
+```env
+GNANI_ENABLED=true
+GNANI_API_KEY=your_gnani_vachana_key_here
+GNANI_BASE_URL=https://api.vachana.ai
+GNANI_STT_MODEL=prisma-v2.5
+GNANI_TTS_MODEL=timbre-v2.5
+```
+
+Docs: [Gnani Integration Guide](docs/GNANI_INTEGRATION.md) · [Indic Speech Lab](docs/INDIC_SPEECH_LAB.md) · [Gnani Benchmarks](docs/GNANI_BENCHMARKS.md) · [Wispr Protection Report](docs/WISPR_REGRESSION_REPORT.md)
 
 ---
 

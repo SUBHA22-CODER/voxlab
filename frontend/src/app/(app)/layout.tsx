@@ -8,11 +8,14 @@ import {
   ChartLine,
   Dna,
   Flask,
+  Globe,
   Lightning,
   Microphone,
   Robot,
   SignOut,
+  SpeakerHigh,
   SquaresFour,
+  Stack,
   Waveform,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth-context";
@@ -31,6 +34,9 @@ const NAV = [
   { href: "/darwin", label: "Darwin Fuzzing", icon: Dna },
   { href: "/audio/darwin", label: "Darwin Audio", icon: Waveform },
   { href: "/regressions", label: "Regressions", icon: Flask },
+  { href: "/indic", label: "Indic Speech Lab", icon: Globe },
+  { href: "/tts", label: "TTS Lab", icon: SpeakerHigh },
+  { href: "/providers", label: "Providers", icon: Stack },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

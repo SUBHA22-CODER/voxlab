@@ -33,6 +33,11 @@ class EngineRegistry:
         return bool(cls and cls.is_available())
 
     def install_hint(self, engine_id: str) -> str:
+        if engine_id == "gnani_prisma":
+            return (
+                "Gnani Prisma STT requires GNANI_ENABLED=true and GNANI_API_KEY set in backend environment. "
+                "See docs/GNANI_INTEGRATION.md"
+            )
         if engine_id == "wav2vec2":
             return (
                 f"Engine '{engine_id}' is known but its runtime is not installed. "
@@ -102,6 +107,12 @@ def build_default_registry() -> EngineRegistry:
         registry.register(Wav2Vec2Engine)
     except Exception as exc:  # noqa: BLE001 - defensive, contained
         logger.warning("wav2vec2 adapter could not be registered: %s", exc)
+    try:
+        from ..providers.gnani.prisma_adapter import GnaniPrismaEngine
+
+        registry.register(GnaniPrismaEngine)
+    except Exception as exc:  # noqa: BLE001 - defensive, contained
+        logger.warning("gnani_prisma adapter could not be registered: %s", exc)
     return registry
 
 

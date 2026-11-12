@@ -189,33 +189,176 @@ PERSONAS: dict[str, PersonaDefinition] = {
         is_dictation_focused=False,
     ),
 
-    # --- Stubs for Future Personas ---
-    "mumbler": PersonaDefinition(
-        id="mumbler",
-        name="Mumbler (Stub)",
-        description="Low confidence, trailing off, phonetically ambiguous words.",
-        system_prompt="Stub persona for phonetic ambiguity.",
-        strategies=["Phonetic ambiguity"],
-        heuristic_bank=["...mumble... order... forty... something..."],
-        is_stub=True,
+    # --- Darwin Indic & Multilingual Speech Personas (Gnani AI & Indic Lab) ---
+    "hinglish_switcher": PersonaDefinition(
+        id="hinglish_switcher",
+        name="HinglishSwitcher",
+        description="Seamlessly switches between Hindi and English mid-sentence testing code-switching ASR.",
+        system_prompt=(
+            "You speak natural conversational Hinglish (Hindi + English). "
+            "Mix English technical loanwords ('refund', 'payment', 'delivery', 'order') with Hindi grammar and verbs. "
+            "e.g., 'Mera refund abhi tak process nahi hua, customer support ko call connect karo please.'"
+        ),
+        strategies=[
+            "Technical loanwords in Hindi matrix clause",
+            "Discourse markers (matlab, yaar, achha) surrounding critical account numbers",
+            "Bilingual intent phrasing",
+        ],
+        heuristic_bank=[
+            "Mera order cancel karo please, mujhe refund chahiye immediately.",
+            "Account balance check karke batao yaar, SMS alert nahi aaya.",
+            "Delivery address change karna hai, 42 MG Road par deliver mat karna.",
+            "Payment decline ho gaya tha, transaction receipt email par bhej do.",
+        ],
+        is_dictation_focused=True,
     ),
-    "topic_changer": PersonaDefinition(
-        id="topic_changer",
-        name="Topic-Changer (Stub)",
-        description="Changes intent three times across distinct domains.",
-        system_prompt="Stub persona for topic agility.",
-        strategies=["Three distinct topic changes"],
-        heuristic_bank=["Actually let's talk about billing instead."],
-        is_stub=True,
+    "benglish_speaker": PersonaDefinition(
+        id="benglish_speaker",
+        name="BenglishSpeaker",
+        description="Bengali-English code-switching testing Eastern Indic speech boundary detection.",
+        system_prompt=(
+            "You speak natural Benglish (Bengali + English code-switching). "
+            "Mix English terms with Bengali sentence structures and verbs."
+        ),
+        strategies=["Loanword inflection", "Bengali clitics with English nouns"],
+        heuristic_bank=[
+            "Ami order track korte parchi na, shipment delayed keno?",
+            "Payment confirmation message ta ashlo na, transaction verify korun.",
+            "App theke login hocche na, OTP send korun please.",
+        ],
+        is_dictation_focused=True,
     ),
-    "long_winded_rambler": PersonaDefinition(
-        id="long_winded_rambler",
-        name="Long-Winded Rambler (Stub)",
-        description="Tells a multi-paragraph backstory before stating intent.",
-        system_prompt="Stub persona for long context retention.",
-        strategies=["Extensive backstory"],
-        heuristic_bank=["So five years ago my uncle gave me this watch..."],
-        is_stub=True,
+    "tanglish_speaker": PersonaDefinition(
+        id="tanglish_speaker",
+        name="TanglishSpeaker",
+        description="Tamil-English code-switching testing Dravidian-Latin phonetic boundaries.",
+        system_prompt=(
+            "You speak Tanglish (Tamil + English code-switching). "
+            "Combine English nouns with Tamil verbal suffixes and conversational particles."
+        ),
+        strategies=["Tamil verbal suffixes on English roots", "Rapid code-mixing"],
+        heuristic_bank=[
+            "Enoda credit card payment decline aaidichu, status check pannunga.",
+            "Order delivery eppo varum? Customer support call connect pannunga.",
+            "Ticket raise panni refund initiate pannunga please.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "regional_accent_tester": PersonaDefinition(
+        id="regional_accent_tester",
+        name="RegionalAccentTester",
+        description="Tests Indian English phonology, retroflex stops, and vernacular syntax idioms.",
+        system_prompt=(
+            "You speak Indian English with authentic regional phrasing, syllable timing, "
+            "and common vernacular idioms: 'do one thing', 'revert back', 'prepone', 'pass out of college'."
+        ),
+        strategies=["Retroflex consonant patterns", "Indian English business idioms"],
+        heuristic_bank=[
+            "Do one thing, revert back to me on the order status by end of day.",
+            "Kindly prepone the appointment from Thursday to Wednesday 10 AM.",
+            "Can you tell me which outlet is having stock available right now?",
+        ],
+        is_dictation_focused=False,
+    ),
+    "background_noise_injector": PersonaDefinition(
+        id="background_noise_injector",
+        name="BackgroundNoiseInjector",
+        description="Simulates loud Indian ambient environments: street traffic, market chatter, ceiling fans.",
+        system_prompt="You speak amidst heavy acoustic disruptions.",
+        strategies=["Acoustic SNR degradation", "High ambient traffic honks"],
+        heuristic_bank=[
+            "[Traffic honk] Cancel the booking for [bus noise] order forty two.",
+            "[Market chatter] Please send the invoice to my registered WhatsApp number.",
+        ],
+        is_dictation_focused=False,
+    ),
+    "fast_speech_persona": PersonaDefinition(
+        id="fast_speech_persona",
+        name="FastSpeechPersona",
+        description="Extremely rapid cadence (250+ WPM) testing end-pointer and streaming chunk buffers.",
+        system_prompt="You speak with high conversational velocity without pauses.",
+        strategies=["250+ WPM velocity", "Reduced inter-word acoustic pauses"],
+        heuristic_bank=[
+            "Checkmyorderbalanceandcanceltheshippingrightnowbeforeitdispatch.",
+            "Scheduleameetingforwednesdayatfourpmwiththeproductteamurgently.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "slow_speech_persona": PersonaDefinition(
+        id="slow_speech_persona",
+        name="SlowSpeechPersona",
+        description="Very slow, hesitant speech with extended inter-word pauses (>1.5s) testing VAD cutoffs.",
+        system_prompt="You speak very slowly with prolonged pauses between thoughts.",
+        strategies=["Extended silences", "VAD timeout boundary testing"],
+        heuristic_bank=[
+            "I need... to verify... my account... number... four... eight... two... one.",
+            "Please... refund... the amount... to my... original card.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "self_correction_persona": PersonaDefinition(
+        id="self_correction_persona",
+        name="SelfCorrectionPersona",
+        description="Rapid self-corrections involving Indian currencies, phone numbers, and regional dates.",
+        system_prompt="You correct yourself rapidly on Indian names, numbers, and amounts.",
+        strategies=["Lakh/Crore correction", "10-digit mobile number correction"],
+        heuristic_bank=[
+            "Transfer fifty thousand rupees, no wait, one lakh fifty thousand rupees to account 9104.",
+            "Send OTP to 98450, scratch that, 9845012345.",
+            "Delivery to Bengaluru branch, wait no, Chennai head office.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "filler_word_persona": PersonaDefinition(
+        id="filler_word_persona",
+        name="FillerWordPersona",
+        description="Heavy use of Indic verbal fillers: matlab, yaani, arre, basically, like, you know.",
+        system_prompt="You saturate your sentences with Indian and English verbal crutches.",
+        strategies=["Matlab/Yaani verbal crutches", "Repetition hesitations"],
+        heuristic_bank=[
+            "Matlab, arre order cancel karna tha, like basically refund issue ho gaya tha.",
+            "You know, yaani call connect karo na support team se, matlab urgently.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "proper_noun_confuser": PersonaDefinition(
+        id="proper_noun_confuser",
+        name="ProperNounConfuser",
+        description="Complex Indian surnames, regional cities, and multi-word brand names.",
+        system_prompt="You invoke phonetically intricate Indian proper nouns.",
+        strategies=["Multisyllabic South/North Indian surnames", "Tier-2/3 Indian cities"],
+        heuristic_bank=[
+            "Transfer invoice to Dr. Venkateswaran Bhattacharya at Thiruvananthapuram.",
+            "Ship package via BlueDart to Visakhapatnam near Jagadamba junction.",
+            "Schedule interview for Aniruddha Mukherjee from Bhubaneswar office.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "number_confuser": PersonaDefinition(
+        id="number_confuser",
+        name="NumberConfuser",
+        description="Indian numbering scale (Lakh, Crore) alongside 10-digit mobile and UPI IDs.",
+        system_prompt="You test numerical systems, lakhs, crores, and Indian alphanumeric IDs.",
+        strategies=["Lakh vs Million disambiguation", "UPI VPA handle transcription"],
+        heuristic_bank=[
+            "The total cost is 15 lakh 75 thousand rupees, not 1.5 million.",
+            "My UPI ID is sharma.pradeep98@okaxis for refund of ₹4,500.",
+            "Verify transaction reference 894012840192 for two crore rupees.",
+        ],
+        is_dictation_focused=True,
+    ),
+    "codeswitch_mutation": PersonaDefinition(
+        id="codeswitch_mutation",
+        name="CodeSwitchMutation",
+        description="Dynamic intra-sentential language switching between Indic languages and English.",
+        system_prompt="You switch language mid-sentence at arbitrary syntactic boundaries.",
+        strategies=["Intra-sentential code-switching", "Mixed script phoneme shifts"],
+        heuristic_bank=[
+            "Flight status check karke tell me if it is on time or delayed.",
+            "Credit card bill pay panniyachu but account balance reflect aagala.",
+            "Bank statement download korlam kintu password protected file open hocche na.",
+        ],
+        is_dictation_focused=True,
     ),
 }
 

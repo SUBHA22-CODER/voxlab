@@ -58,6 +58,13 @@ class Settings(BaseSettings):
     speech_wav2vec2_auto_download: bool = False
     speech_wav2vec2_word_timestamps: bool = True
 
+    # Gnani AI Provider Integration (Prisma STT + Timbre TTS)
+    gnani_enabled: bool = False
+    gnani_api_key: str = ""
+    gnani_base_url: str = "https://api.vachana.ai"
+    gnani_stt_model: str = "prisma-v2.5"
+    gnani_tts_model: str = "timbre-v2.5"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

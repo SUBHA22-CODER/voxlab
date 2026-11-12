@@ -9,6 +9,8 @@ from .darwin_audio import router as darwin_audio_router
 from .regressions import router as regressions_router
 from .analytics import router as analytics_router
 from .security import router as security_router
+from .indic import router as indic_router
+from .providers import router as providers_router
 
 api_v1_router = APIRouter()
 api_v1_router.include_router(audio_router)
@@ -17,5 +19,7 @@ api_v1_router.include_router(regressions_router)
 api_v1_router.include_router(benchmarks_router)
 api_v1_router.include_router(security_router)
 api_v1_router.include_router(analytics_router)
+api_v1_router.include_router(indic_router)
+api_v1_router.include_router(providers_router)
 
 __all__ = ["api_v1_router"]
