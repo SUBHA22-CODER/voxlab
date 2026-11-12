@@ -31,6 +31,8 @@ from typing import Any
 
 import numpy as np
 
+from ...core.config import get_settings
+
 from ..alignment import WordTiming
 from ..base import (
     AudioData,
@@ -149,18 +151,30 @@ class Wav2Vec2Engine(SpeechEngine):
 
     @classmethod
     def describe_capabilities(cls) -> EngineCapabilities:
-        """Static capabilities declaration without triggering a model load."""
+        """Static default (base-960h is English-only). Instance-level
+        get_capabilities() reports the configured model's language set."""
         return EngineCapabilities(
-            languages=["en"],  # facebook/wav2vec2-base-960h is English-only
-            supports_timestamps=True,  # via CTC token offsets
-            supports_language_detection=False,  # fixed English acoustic model
+            languages=["en"],
+            supports_timestamps=True,
+            supports_language_detection=False,
             streaming_mode="chunked_window",
             max_audio_duration_seconds=None,
         )
 
+    def _accepted_languages(self) -> set[str]:
+        """Accepted language set, driven by the configured model (audit fix:
+        swapping to a multilingual CTC checkpoint must update capabilities)."""
+        import os
+
+        override = os.environ.get("SPEECH_WAV2VEC2_LANGUAGES", "")
+        if not override:
+            override = get_settings().speech_wav2vec2_languages or "en"
+        return {lang.strip().lower() for lang in override.split(",") if lang.strip()}
+
     def get_capabilities(self) -> EngineCapabilities:
+        """Instance capabilities from the configured model (audit fix)."""
         caps = self.describe_capabilities()
-        caps.supports_timestamps = bool(self.word_timestamps)
+        caps.languages = sorted(self._accepted_languages())
         return caps
 
     def get_metadata(self) -> EngineMetadata:
@@ -186,7 +200,7 @@ class Wav2Vec2Engine(SpeechEngine):
             model=model_label,
             device=self.device,
             compute_type="float32",
-            attribution=self.ATTRIBUTION,
+            attribution=ATTRIBUTION,
             installed=self.is_available(),
         )
 
@@ -325,9 +339,14 @@ class Wav2Vec2Engine(SpeechEngine):
                 f"wav2vec2 expects {self.sample_rate} Hz; got {audio.sample_rate}. "
                 "Prepare audio through app.speech.audio.prepare_engine_audio."
             )
-        if language not in (None, "en"):
+        base_lang = (language or "en").split("-")[0].lower()
+        accepted = self._accepted_languages()
+        if base_lang not in accepted:
             raise TranscriptionFailed(
-                f"wav2vec2 base-960h model is English-only (got language={language!r})."
+                f"wav2vec2 model '{self.model_name}' is English-only for the "
+                f"configured language set {sorted(accepted)} (got "
+                f"language={language!r}). Swap SPEECH_WAV2VEC2_MODEL or adjust "
+                "speech_wav2vec2_languages."
             )
 
         processor, model = await self._ensure_model()
@@ -355,8 +374,8 @@ class Wav2Vec2Engine(SpeechEngine):
         return TranscriptionResult(
             engine=self.engine_id(),
             text=text,
-            language="en",
-            language_probability=None,  # fixed English acoustic model
+            language=(language or "en").split("-")[0].lower(),
+            language_probability=None,  # fixed acoustic model, no detection
             segments=segments,
             duration_seconds=duration or audio.duration_seconds,
             processing_time_seconds=time.perf_counter() - started,

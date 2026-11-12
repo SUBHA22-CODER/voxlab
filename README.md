@@ -9,7 +9,7 @@
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![CI](https://img.shields.io/github/actions/workflow/status/SUBHA22-CODER/voxlab/ci.yml?label=CI)](https://github.com/SUBHA22-CODER/voxlab/actions/workflows/ci.yml)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.4.3-black.svg)](https://nextjs.org)
-[![Pytest](https://img.shields.io/badge/Pytest-267%20Passed-emerald.svg)](backend/tests/)
+[![Pytest](https://img.shields.io/badge/Pytest-292%20Passed-emerald.svg)](backend/tests/)
 [![Tailored for Wispr Flow](https://img.shields.io/badge/Tailored%20for-Wispr%20Flow-6366f1.svg)](https://wisprflow.ai)
 [![Gnani AI Integration](https://img.shields.io/badge/Provider-Gnani%20AI%20(Prisma%20%2B%20Timbre)-emerald.svg)](https://docs.gnani.ai/)
 [![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/subha22-coder/voxlab?utm_source=readme&utm_medium=badge)

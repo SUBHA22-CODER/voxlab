@@ -34,7 +34,14 @@ MONTHS = {
 WEEKDAYS = {
     "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
 }
-NEGATION_TOKENS = {"not", "no", "never", "dont", "doesnt", "didnt", "wont", "cannot", "cant", "isnt", "wasnt", "arent", "werent"}
+NEGATION_TOKENS = {
+    "not", "no", "never", "dont", "doesnt", "didnt", "wont", "cannot", "cant",
+    "isnt", "wasnt", "arent", "werent",
+    # Hinglish/Indic polarity words (unambiguous meanings only):
+    "nahi", "nahin", "mat", "bilkul",  # nahi/nahin = no/not, mat = don't
+    "नहीं",  # नहीं (nahiin, Devanagari)
+    "मत",  # मत (mat, Devanagari)
+}
 IMPERATIVE_HINTS = {"schedule", "deploy", "send", "cancel", "create", "update", "delete", "run", "start", "stop", "call", "email", "ship", "fix", "write", "review", "set", "order"}
 # Morphological variants that do NOT change meaning when substituted.
 MORPH_VARIANTS = {

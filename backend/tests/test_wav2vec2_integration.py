@@ -118,7 +118,7 @@ class TestWav2Vec2RealEngine:
         caps = engine.get_capabilities()
         assert caps.streaming_mode == "chunked_window"
         assert caps.supports_language_detection is False
-        assert caps.languages == ["en"]
+        assert caps.languages == ["en"]  # config-driven (audit fix)
         assert caps.supports_timestamps is True
 
     async def test_rejects_non_english_language_request(

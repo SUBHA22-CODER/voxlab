@@ -155,6 +155,7 @@ export default function DarwinAudioPage() {
   const [population, setPopulation] = useState(4);
   const [generations, setGenerations] = useState(2);
   const [threshold, setThreshold] = useState(0.4);
+  const [language, setLanguage] = useState("en");
   const [run, setRun] = useState<DarwinAudioRun | null>(null);
   const [findings, setFindings] = useState<DarwinAudioFinding[]>([]);
   const [runs, setRuns] = useState<DarwinAudioRun[]>([]);
@@ -216,7 +217,7 @@ export default function DarwinAudioPage() {
         file,
         referenceTranscript: reference,
         engineId: "whisper_local",
-        language: "en",
+        language,
         populationSize: population,
         generations,
         topK: 2,
@@ -370,6 +371,15 @@ export default function DarwinAudioPage() {
                   step={0.05}
                   value={threshold}
                   onChange={(e) => setThreshold(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="language-input">Language</Label>
+                <Input
+                  id="language-input"
+                  placeholder="en, hi, ta-IN…"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
                 />
               </div>
               <p className="col-span-3 text-[11px] leading-snug text-zinc-600">

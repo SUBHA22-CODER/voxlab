@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     # ~40 MB small English model. Default off — no surprise downloads.
     speech_vosk_model_dir: str = ""
     speech_vosk_auto_download: bool = False
+    # Accepted language codes for the configured vosk model (comma-separated).
+    # Defaults are derived from the model-dir name when empty.
+    speech_vosk_languages: str = ""
 
     # Third engine (Wav2Vec2-base): CTC acoustic model from Hugging Face.
     # Default model: facebook/wav2vec2-base-960h (~380 MB).
@@ -57,6 +60,10 @@ class Settings(BaseSettings):
     speech_wav2vec2_model_dir: str = ""
     speech_wav2vec2_auto_download: bool = False
     speech_wav2vec2_word_timestamps: bool = True
+    # Accepted language codes for the configured CTC model (comma-separated).
+    # Default "en" matches facebook/wav2vec2-base-960h; swap the model and set
+    # e.g. "hi,mr,ta" for a multilingual CTC checkpoint.
+    speech_wav2vec2_languages: str = "en"
 
     # Gnani AI Provider Integration (Prisma STT + Timbre TTS)
     gnani_enabled: bool = False

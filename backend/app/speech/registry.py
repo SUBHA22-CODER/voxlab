@@ -43,6 +43,11 @@ class EngineRegistry:
                 f"Engine '{engine_id}' is known but its runtime is not installed. "
                 "Install the speech extra: pip install -r requirements-speech-wav2vec2.txt"
             )
+        if engine_id == "vosk":
+            return (
+                f"Engine '{engine_id}' is known but its runtime is not installed. "
+                "Install the speech extra: pip install -r requirements-speech-vosk.txt"
+            )
         return (
             f"Engine '{engine_id}' is known but its runtime is not installed. "
             "Install the speech extra: pip install -r requirements-speech.txt"

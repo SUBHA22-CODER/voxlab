@@ -55,6 +55,35 @@ def _pcm16_bytes(samples: np.ndarray) -> bytes:
     return (clipped * 32767.0).astype("<i2").tobytes()
 
 
+def _configured_vosk_languages(model_ref: str) -> set[str]:
+    """Accepted language set for the configured vosk model.
+
+    Default small-en-us -> {"en"}; a model dir whose name encodes another
+    language (e.g. vosk-model-small-hi-0.22) maps to that language, and the
+    speech_vosk_languages setting overrides everything (comma-separated).
+    """
+    import os
+
+    override = os.environ.get("SPEECH_VOSK_LANGUAGES", "")
+    if not override:
+        try:
+            from ...core.config import get_settings
+
+            override = get_settings().speech_vosk_languages or ""
+        except Exception:  # noqa: BLE001 - settings optional in standalone use
+            override = ""
+    if override:
+        return {lang.strip().lower() for lang in override.split(",") if lang.strip()}
+    model_id = model_ref.lower()
+    for code in ("en-us", "en-gb", "en-in", "hi", "ta", "te", "kn", "mr", "bn",
+                 "gu", "ml", "or", "pa", "zh-cn", "zh-hk", "ja", "ru", "de",
+                 "fr", "es", "pt", "it", "tr", "vi", "nl", "ca", "cs", "pl",
+                 "sv", "fa", "uk", "kz", "uz", "ph"):
+        if f"-{code}-" in model_id or model_id.endswith(f"-{code}"):
+            return {code.split("-")[0]}
+    return {"en"}
+
+
 class VoskEngine(SpeechEngine):
     """Offline CPU STT via Vosk with real sequential decoding."""
 
@@ -98,7 +127,7 @@ class VoskEngine(SpeechEngine):
     @classmethod
     def describe_capabilities(cls) -> EngineCapabilities:
         return EngineCapabilities(
-            languages=["en"],  # small-en-us model; more via other model dirs
+            languages=["en"],  # default small-en-us model; config-driven below
             supports_timestamps=True,
             supports_language_detection=False,  # fixed-language models
             streaming_mode="streaming_decode",
@@ -106,7 +135,13 @@ class VoskEngine(SpeechEngine):
         )
 
     def get_capabilities(self) -> EngineCapabilities:
-        return self.describe_capabilities()
+        caps = self.describe_capabilities()
+        # Language set follows the configured model: pointing the engine at a
+        # Hindi model dir (SPEECH_VOSK_MODEL_DIR / speech_vosk_model_dir) must
+        # not leave the engine claiming English-only (audit fix, VoxLab 2.6).
+        configured = _configured_vosk_languages(self._resolved_model_dir())
+        caps.languages = sorted(configured)
+        return caps
 
     def get_metadata(self) -> EngineMetadata:
         import vosk
@@ -224,9 +259,14 @@ class VoskEngine(SpeechEngine):
                 f"vosk expects {self.sample_rate} Hz; got {audio.sample_rate}. "
                 "Prepare audio through app.speech.audio.prepare_engine_audio."
             )
-        if language not in (None, "en"):
+        accepted = _configured_vosk_languages(self._resolved_model_dir())
+        base_lang = (language or "en").split("-")[0].lower()
+        if base_lang not in accepted and "auto" not in accepted:
             raise TranscriptionFailed(
-                f"vosk small-en-us model is English-only (got language={language!r})."
+                f"vosk model '{self._resolved_model_dir()}' "
+                f"accepts {sorted(accepted)}; got language={language!r}. Point "
+                "SPEECH_VOSK_MODEL_DIR at a matching model or adjust "
+                "speech_vosk_languages."
             )
 
         started = time.perf_counter()

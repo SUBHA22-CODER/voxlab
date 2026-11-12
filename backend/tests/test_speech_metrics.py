@@ -193,3 +193,48 @@ def test_entity_accuracy_none_when_no_entities():
     assert report.number_accuracy is None
     assert report.language_correct is None  # no languages provided
     assert report.realtime_factor is None  # no timing provided
+
+
+# --- Indic-safe normalization (VoxLab 2.6 audit fix) --------------------------
+
+
+def test_nukta_survives_indic_normalization():
+    """The Devanagari nukta (U+093C, category Mn) must not be deleted by the
+    punctuation strip — deleting it merges ड/ड़ and ज/ज़ word pairs."""
+    decomposed = "ड" + "\u093c" + " ज" + "\u093c"
+    out = normalize_text(decomposed, NormalizationConfig())
+    assert "\u093c" in out, f"nukta was deleted: {[hex(ord(ch)) for ch in out]}"
+
+
+def test_old_nfkd_path_would_delete_nukta_regression_guard():
+    import unicodedata
+
+    decomposed = "ड" + "\u093c"
+    # the OLD path genuinely lost the nukta — pin that this test would catch it
+    old = unicodedata.normalize("NFKD", decomposed)
+    old = "".join(ch for ch in old if not unicodedata.combining(ch))
+    import re
+
+    old = re.sub(r"[^\w\s]", " ", old)
+    assert "\u093c" not in old  # demonstrates the pre-fix bug
+
+
+def test_hinglish_normalization_mixed_script():
+    out = normalize_text("Deliver ड़ order, yaar!", NormalizationConfig())
+    assert "\u093c" in out or "\u0958" in out
+    assert "yaar" in out
+
+
+def test_english_path_byte_identical_after_indic_change():
+    assert normalize_text("Hello, World! I'm ready.", NormalizationConfig()) == "hello world i am ready"
+    assert normalize_text("café naïve", NormalizationConfig()) == "cafe naive"
+
+
+def test_semantic_hinglish_negation_detected():
+    from app.speech.semantic import analyze_semantic_errors
+
+    analysis = analyze_semantic_errors("deliver nahi hua order", "deliver hua order")
+    assert any(e.error_type == "negation_error" for e in analysis.errors)
+    assert analysis.meaning_preserved is False
+
+

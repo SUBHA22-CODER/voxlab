@@ -124,10 +124,10 @@ class TestVoskRealEngine:
         caps = engine.get_capabilities()
         assert caps.streaming_mode == "streaming_decode"
         assert caps.supports_language_detection is False
-        assert caps.languages == ["en"]
+        assert caps.languages == ["en"]  # config-driven (audit fix)
 
     async def test_rejects_non_english_language_request(
         self, engine: VoskEngine, speech_wav: Path
     ) -> None:
-        with pytest.raises(TranscriptionFailed, match="English-only"):
+        with pytest.raises(TranscriptionFailed, match="accepts"):
             await engine.transcribe(_audio_of(speech_wav), language="de")

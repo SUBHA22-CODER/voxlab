@@ -218,3 +218,11 @@ async def test_llm_judgment_out_of_range_confidence_is_null():
     raw_output = '{"meaning_preserved": true, "confidence": 7.5, "errors": []}'
     judgment = await judge_semantics_with_llm(StubLLM(raw_output), "a", "a")
     assert judgment.confidence is None  # never guessed, never clamped silently
+
+
+def test_semantic_devanagari_negation_detected():
+    analysis = analyze_semantic_errors(
+        "refund नहीं aaya hai", "refund aaya hai"
+    )
+    assert any(e.error_type == "negation_error" for e in analysis.errors)
+    assert analysis.meaning_preserved is False

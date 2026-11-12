@@ -162,14 +162,65 @@ def _expand_numbers(text: str) -> str:
     return _NUM_IN_TEXT.sub(_sub, text)
 
 
+# Indic Unicode blocks. NFKD + combining-strip deletes the Devanagari nukta
+# (U+093C, ccc=7), corrupting ड/ड़ and ज/ज़ pairs before WER/CER — Indic
+# scripts therefore take the NFC path instead (composing, lossless).
+INDIC_RANGES: tuple[tuple[int, int], ...] = (
+    (0x0900, 0x097F),  # Devanagari (Hindi, Marathi, Nepali)
+    (0x0980, 0x09FF),  # Bengali-Assamese
+    (0x0A00, 0x0A7F),  # Gurmukhi (Punjabi)
+    (0x0A80, 0x0AFF),  # Gujarati
+    (0x0B00, 0x0B7F),  # Oriya
+    (0x0B80, 0x0BFF),  # Tamil
+    (0x0C00, 0x0C7F),  # Telugu
+    (0x0C80, 0x0CFF),  # Kannada
+    (0x0D00, 0x0D7F),  # Malayalam
+)
+
+
+def has_indic_script(text: str) -> bool:
+    """True when the text contains any Indic-script character."""
+    return any(
+        any(lo <= ord(ch) <= hi for lo, hi in INDIC_RANGES) for ch in text
+    )
+
+
+def _strip_punctuation_mark_safe(text: str) -> str:
+    """Punctuation strip that preserves combining marks (category M*).
+
+    Used on the Indic path: `PUNCT_PATTERN` (`[^\\w\\s]`) deletes nonspacing
+    marks such as the Devanagari nukta (U+093C), silently merging ड/ड़ and
+    ज/ज़ pairs. Removes only punctuation/symbol categories instead."""
+    kept: list[str] = []
+    for ch in text:
+        if ch.isspace():
+            kept.append(ch)
+            continue
+        category = unicodedata.category(ch)
+        if category.startswith(("P", "S")):
+            kept.append(" ")
+            continue
+        kept.append(ch)
+    return "".join(kept)
+
+
 def normalize_text(text: str, config: NormalizationConfig) -> str:
     """Apply the configured normalization chain. Order matters and is fixed:
     unicode fold -> lowercase -> contractions -> numbers -> fillers ->
-    punctuation strip -> whitespace collapse."""
+    punctuation strip -> whitespace collapse.
+
+    Unicode folding is script-aware: Latin text takes the NFKD +
+    combining-strip path (accent folding); text containing Indic-script
+    characters takes lossless NFC instead, and the punctuation strip becomes
+    mark-preserving (the Devanagari nukta U+093C is category Mn, not \\w, so
+    the default pattern would silently merge ड/ड़ and ज/ज़ pairs)."""
     out = text
     if config.unicode_fold:
-        out = unicodedata.normalize("NFKD", out)
-        out = "".join(ch for ch in out if not unicodedata.combining(ch))
+        if has_indic_script(out):
+            out = unicodedata.normalize("NFC", out)
+        else:
+            out = unicodedata.normalize("NFKD", out)
+            out = "".join(ch for ch in out if not unicodedata.combining(ch))
     if config.lowercase:
         out = out.lower()
     if config.expand_contractions:
@@ -183,7 +234,10 @@ def normalize_text(text: str, config: NormalizationConfig) -> str:
         ]
         out = " ".join(tokens)
     if config.strip_punctuation:
-        out = PUNCT_PATTERN.sub(" ", out)
+        if has_indic_script(out):
+            out = _strip_punctuation_mark_safe(out)
+        else:
+            out = PUNCT_PATTERN.sub(" ", out)
     return re.sub(r"\s+", " ", out).strip()
 
 

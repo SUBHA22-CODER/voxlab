@@ -60,6 +60,7 @@ async def transcribe_audio(
     entities: str | None = Form(default=None),  # comma-separated
     technical_vocab: str | None = Form(default=None),  # comma-separated
     use_llm_judge: bool = Form(default=False),  # advisory LLM layer is opt-in
+    reference_language: str | None = Form(default=None),  # enables language_correct
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -83,6 +84,7 @@ async def transcribe_audio(
             result.text,
             entities=[e.strip() for e in entities.split(",")] if entities else None,
             technical_vocab=[v.strip() for v in technical_vocab.split(",")] if technical_vocab else None,
+            reference_language=reference_language,
             hypothesis_language=result.language,
             processing_time_seconds=result.processing_time_seconds,
             audio_duration_seconds=result.duration_seconds,

@@ -47,6 +47,11 @@ async def get_engine(engine_id: str = WHISPER_LOCAL_ID) -> SpeechEngine:
                 timeout_seconds=settings.speech_timeout_seconds,
             )
             _configured.add(engine_id)
+        if engine_id == "vosk" and engine_id not in _configured:
+            settings = get_settings()
+            if settings.speech_vosk_model_dir:
+                engine._model_dir = settings.speech_vosk_model_dir  # type: ignore[attr-defined]
+            _configured.add(engine_id)
         await engine.initialize()
     return engine
 
